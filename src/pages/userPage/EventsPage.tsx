@@ -1,0 +1,207 @@
+// src/pages/userPage/EventsPage.tsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaSearch, FaStar, FaMapMarkerAlt } from 'react-icons/fa';
+
+interface Event {
+  id: number;
+  title: string;
+  artist: string;
+  date: string;
+  time: string;
+  price: string;
+  image: string;
+}
+
+const EventsPage: React.FC = () => {
+  const [yearFilter, setYearFilter] = useState('All Years');
+  const [locationFilter, setLocationFilter] = useState('All Locations');
+  const [spaceFilter, setSpaceFilter] = useState('All Spaces');
+  const [ratingFilter, setRatingFilter] = useState('All Ratings');
+
+  // Dummy Upcoming Events
+  const upcomingEvents: Event[] = [
+    { id: 1, title: "Mohammod Ahmed Concert", artist: "Mohammod Ahmed", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+    { id: 2, title: "Kassmasse's Concert", artist: "Kassmasse", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+    { id: 3, title: "Aster Aweke Concert", artist: "Aster Aweke", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+    { id: 4, title: "Mohammod Ahmed Concert", artist: "Mohammod Ahmed", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+    { id: 5, title: "After Work Party", artist: "DJ Mix", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+    { id: 6, title: "Ellita Event", artist: "Ellita", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+    { id: 7, title: "Gospel Event", artist: "Various Artists", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+    { id: 8, title: "Teddy Afro Concert", artist: "Teddy Afro", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+    { id: 9, title: "Dawit Melesse Concert", artist: "Dawit Melesse", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/heroBg.jpg" },
+  ];
+
+  // Dummy Popular Events
+  const popularEvents: Event[] = [
+    { id: 10, title: "Mohammod Ahmed Concert", artist: "Mohammod Ahmed", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/api/placeholder/300/200" },
+    { id: 11, title: "Teddy Afro Live", artist: "Teddy Afro", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/api/placeholder/300/200" },
+    { id: 12, title: "Aster Aweke Grand Show", artist: "Aster Aweke", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/api/placeholder/300/200" },
+    { id: 13, title: "Kassmasse Night", artist: "Kassmasse", date: "Wed, Dec 25", time: "6:00 LT", price: "2500ETB", image: "/api/placeholder/300/200" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div
+        className="relative h-96 bg-cover bg-center bg-no-repeat flex items-center justify-center text-white"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/heroBg.jpg')`,
+        }}
+      >
+        <div className="text-center z-10">
+          <h1 className="text-5xl font-bold mb-6">Our Upcoming Events</h1>
+
+          {/* Search Bar */}
+          <div className="flex flex-col sm:flex-row gap-4 max-w-4xl mx-auto">
+            <select className="px-6 py-4 rounded-l-full sm:rounded-l-full sm:rounded-r-none bg-white text-gray-800">
+              <option>Select Category</option>
+              <option>Music</option>
+              <option>Festival</option>
+              <option>Concert</option>
+            </select>
+            <select className="px-6 py-4 bg-white text-gray-800 sm:rounded-none">
+              <option>Select Location</option>
+              <option>Addis Ababa</option>
+              <option>Bole</option>
+              <option>Piassa</option>
+            </select>
+            <button className="bg-green-500 hover:bg-green-600 px-10 py-4 rounded-r-full font-medium flex items-center justify-center gap-3 transition">
+              <FaSearch /> Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-wrap gap-4 items-center mb-8">
+          <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="px-6 py-3 border rounded-lg">
+            <option>All Years</option>
+            <option>2025</option>
+            <option>2026</option>
+          </select>
+          <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="px-6 py-3 border rounded-lg">
+            <option>All Locations</option>
+            <option>Addis Ababa</option>
+            <option>Bahir Dar</option>
+          </select>
+          <select value={spaceFilter} onChange={(e) => setSpaceFilter(e.target.value)} className="px-6 py-3 border rounded-lg">
+            <option>All Spaces</option>
+            <option>Indoor</option>
+            <option>Outdoor</option>
+          </select>
+          <select value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)} className="px-6 py-3 border rounded-lg flex items-center gap-2">
+            <option>All Ratings</option>
+            <option>4+ Stars</option>
+            <option>3+ Stars</option>
+          </select>
+          <button className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-medium transition">
+            Search
+          </button>
+        </div>
+
+        {/* Upcoming Events */}
+        <div className="mb-16">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold">Upcoming Events</h2>
+            <Link to="/events" className="text-green-600 hover:underline">View All (22)</Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {upcomingEvents.map((event) => (
+              <Link to={`/user-event-detail/${event.id}`} key={event.id} className="group">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition">
+                  <div className="relative">
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition"
+                    />
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <span className="bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg">
+                        Explore
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-bold text-lg mb-1">{event.title}</h3>
+                    <p className="text-gray-600 text-sm mb-3">
+                      {event.date}, {event.time}
+                    </p>
+                    <p className="text-green-600 font-bold text-xl">Price: {event.price}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Popular Events */}
+        <div className="mb-16">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold">Popular Events</h2>
+            <Link to="/events" className="text-green-600 hover:underline">View All (22)</Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            {popularEvents.map((event) => (
+              <Link to={`/user-event-detail/${event.id}`} key={event.id} className="group">
+                <div className="bg-white rounded-2xl shadow hover:shadow-xl transition">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-40 object-cover rounded-t-2xl group-hover:scale-105 transition"
+                  />
+                  <div className="p-4">
+                    <h4 className="font-semibold text-sm mb-1 line-clamp-2">{event.title}</h4>
+                    <p className="text-xs text-gray-500">
+                      {event.date}, {event.time}
+                    </p>
+                    <p className="text-green-600 font-bold mt-2">Price: {event.price}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-center gap-2 mt-10">
+            <button className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center">&lt;</button>
+            {[1, 2, 3].map((page) => (
+              <button
+                key={page}
+                className={`w-10 h-10 rounded-full font-medium transition ${
+                  page === 1 ? 'bg-green-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center">&gt;</button>
+          </div>
+        </div>
+
+        {/* CTA Banner */}
+        <div className="bg-gradient-to-r from-green-900 to-green-600 rounded-3xl p-12 text-white text-center mb-16">
+          <div className="grid lg:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
+            <img
+              src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+              alt="Live Event"
+              className="w-full rounded-2xl shadow-2xl"
+            />
+            <div>
+              <h2 className="text-4xl font-bold mb-4">Book Your Next Experience</h2>
+              <p className="text-xl mb-8">Discover trending concerts, festivals, and nightlife moments.</p>
+              <button className="bg-white text-green-600 font-bold px-10 py-4 rounded-full hover:bg-gray-100 transition text-lg">
+                Explore All Events
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EventsPage;
