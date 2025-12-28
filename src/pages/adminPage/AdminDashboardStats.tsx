@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosError } from 'axios';
 import {
   FaUsers,
   FaCalendarAlt,
   FaShoppingCart,
   FaDollarSign,
-  FaTag,
-  FaBuilding,
-  FaTicketAlt,
-  FaCheckCircle,
-  FaClock,
   FaSpinner,
   FaUser,
   FaUserTie,
   FaUserShield,
-  FaEye,
-  FaArrowRight
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useEventContext } from '../../context/EventContext';
@@ -69,54 +61,32 @@ interface DashboardStats {
   recentEvents: Event[];
 }
 
-const BasicDashboard: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+const AdminDashboardStats: React.FC = () => {
+  const { getDashboardStats } = useEventContext();
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalEvents: 0,
-    totalOrders: 0,
-    totalCategories: 0,
-    totalVenues: 0,
-    totalRevenue: 0,
-    pendingOrders: 0,
-    publishedEvents: 0,
-    unpublishedEvents: 0,
-    totalTicketsSold: 0,
-    userRoles: {},
-    recentOrders: [],
-    recentEvents: []
-  });
+  const [stats, setStats] = useState<DashboardStats | null>(null);
 
   useEffect(() => {
-    fetchDashboardStats();
-  }, []);
-
-  const fetchDashboardStats = async () => {
-    try {
+    const fetchStats = async () => {
       setLoading(true);
-      const response = await axios.get(`${BASE_URL}/api/admin/admin-dashboard-stats`, {
-        withCredentials: true
-      });
-
-      if (response.data.success) {
-        setStats(response.data.stats);
-      }
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        const axiosError = err as AxiosError;
-        if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+      try {
+        const res = await getDashboardStats();
+        if (res.success) {
+          setStats(res.data);
+        }
+      } catch (error: any) {
+        console.error('Error fetching dashboard stats:', error);
+        if (error.response?.status === 401 || error.response?.status === 403) {
           navigate("/login");
         }
-      } else {
-        console.log("Server is not responding. Try again later.");
+      } finally {
+        setLoading(false);
       }
-      console.error('Error fetching stats:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchStats();
+  }, [getDashboardStats, navigate]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -128,285 +98,134 @@ const BasicDashboard: React.FC = () => {
   };
 
   const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    });
+    return new Date(dateString).toLocaleDateString();
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-64 mt-20">
         <FaSpinner className="animate-spin text-blue-600 text-4xl" />
-        <span className="ml-4 text-gray-600 text-lg">Loading...</span>
+        <span className="ml-4 text-gray-600 text-lg">Loading Dashboard...</span>
       </div>
     );
   }
 
+  if (!stats) return null;
+
   return (
-    <div className="space-y-6 ml-65 py-4 px-3 pt-20">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-600">Overview of your event platform</p>
-      </div>
+    <div className="ml-60 p-8 pt-20">
+      <div className="max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Dashboard Overview</h1>
+          <p className="text-gray-600">Overview of your event platform</p>
+        </div>
 
-      {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Total Users */}
-        <div className="bg-white rounded-lg shadow p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Total Users</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">
-                {stats.totalUsers.toLocaleString()}
-              </p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-50 rounded-lg text-blue-600"><FaUsers size={24} /></div>
+              <span className="text-2xl font-bold text-gray-800">{stats.totalUsers}</span>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <FaUsers className="text-blue-600 text-xl" />
-            </div>
+            <p className="text-gray-500 font-medium">Total Users</p>
           </div>
-          <div className="mt-4 flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <FaUser className="text-gray-400" />
-              <span className="text-gray-600">{stats.userRoles.user || 0} Users</span>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-50 rounded-lg text-green-600"><FaCalendarAlt size={24} /></div>
+              <span className="text-2xl font-bold text-gray-800">{stats.totalEvents}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <FaUserTie className="text-blue-400" />
-              <span className="text-gray-600">{stats.userRoles.organizer || 0} Organizers</span>
+            <p className="text-gray-500 font-medium">Total Events</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-purple-50 rounded-lg text-purple-600"><FaShoppingCart size={24} /></div>
+              <span className="text-2xl font-bold text-gray-800">{stats.totalOrders}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <FaUserShield className="text-red-400" />
-              <span className="text-gray-600">{stats.userRoles.admin || 0} Admins</span>
+            <p className="text-gray-500 font-medium">Total Orders</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-yellow-50 rounded-lg text-yellow-600"><FaDollarSign size={24} /></div>
+              <span className="text-2xl font-bold text-gray-800">{formatCurrency(stats.totalRevenue)}</span>
             </div>
+            <p className="text-gray-500 font-medium">Total Revenue</p>
           </div>
         </div>
 
-        {/* Total Events */}
-        <div className="bg-white rounded-lg shadow p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Total Events</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">
-                {stats.totalEvents.toLocaleString()}
-              </p>
-            </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <FaCalendarAlt className="text-green-600 text-xl" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <FaCheckCircle className="text-green-500" />
-              <span className="text-gray-600">{stats.publishedEvents} Published</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaClock className="text-yellow-500" />
-              <span className="text-gray-600">{stats.unpublishedEvents} Unpublished</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Orders */}
-        <div className="bg-white rounded-lg shadow p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">
-                {stats.totalOrders.toLocaleString()}
-              </p>
-            </div>
-            <div className="p-3 bg-purple-100 rounded-full">
-              <FaShoppingCart className="text-purple-600 text-xl" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <FaDollarSign className="text-green-500" />
-              <span className="text-gray-600">Revenue: {formatCurrency(stats.totalRevenue)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaClock className="text-yellow-500" />
-              <span className="text-gray-600">{stats.pendingOrders} Pending</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Tickets */}
-        <div className="bg-white rounded-lg shadow p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Tickets Sold</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">
-                {stats.totalTicketsSold.toLocaleString()}
-              </p>
-            </div>
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <FaTicketAlt className="text-yellow-600 text-xl" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <FaTag className="text-blue-400" />
-              <span className="text-gray-600">{stats.totalCategories} Categories</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaBuilding className="text-purple-400" />
-              <span className="text-gray-600">{stats.totalVenues} Venues</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Data Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800">Recent Orders</h3>
-              <button
-                onClick={() => navigate('/admin/orders')}
-                className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
-              >
-                View All <FaArrowRight className="text-xs" />
-              </button>
-            </div>
-          </div>
-          <div className="p-4">
-            {stats.recentOrders.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No recent orders
+        {/* Roles Distribution & Secondary Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            {/* Recent Orders Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-6 border-b border-gray-50 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-800">Recent Orders</h2>
+                <button onClick={() => navigate('/admin/admin-orders')} className="text-blue-600 hover:underline text-sm font-medium">View All</button>
               </div>
-            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {stats.recentOrders.map(order => (
+                      <tr key={order._id} className="hover:bg-gray-50 transition">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.orderNumber || order._id.slice(-6)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.user?.name || 'Guest'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-semibold">{formatCurrency(order.totalAmount || 0)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            {order.paymentStatus}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            {/* User Roles Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">User Roles</h2>
               <div className="space-y-4">
-                {stats.recentOrders.map((order) => (
-                  <div key={order._id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium text-gray-800">
-                        {order.orderNumber || `ORD-${order._id.substring(18, 24)}`}
-                      </p>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <span>{order.user?.name}</span>
-                        <span>•</span>
-                        <span>{order.event?.title}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-800">
-                        ${order.totalAmount?.toFixed(2) || '0.00'}
-                      </p>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        order.paymentStatus === 'paid'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {order.paymentStatus}
-                      </span>
-                    </div>
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FaUser className="text-blue-600" />
+                    <span className="font-medium text-gray-700">Users</span>
                   </div>
-                ))}
+                  <span className="font-bold text-blue-600">{stats.userRoles.user || 0}</span>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FaUserTie className="text-green-600" />
+                    <span className="font-medium text-gray-700">Organizers</span>
+                  </div>
+                  <span className="font-bold text-green-600">{stats.userRoles.organizer || 0}</span>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FaUserShield className="text-red-600" />
+                    <span className="font-medium text-gray-700">Admins</span>
+                  </div>
+                  <span className="font-bold text-red-600">{stats.userRoles.admin || 0}</span>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Events */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800">Recent Events</h3>
-              <button
-                onClick={() => navigate('/admin/events')}
-                className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
-              >
-                View All <FaArrowRight className="text-xs" />
-              </button>
             </div>
           </div>
-          <div className="p-4">
-            {stats.recentEvents.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No recent events
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {stats.recentEvents.map((event) => (
-                  <div key={event._id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                        {event.image ? (
-                          <img
-                            src={`${BASE_URL}/uploads/${event.image}`}
-                            alt={event.title}
-                            className="w-full h-full rounded-lg object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.onerror = null;
-                              target.src = '/Placeholder.png';
-                            }}
-                          />
-                        ) : (
-                          <FaCalendarAlt className="text-gray-500" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800">{event.title}</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                          <span>{event.organizer?.name}</span>
-                          <span>•</span>
-                          <span>{event.category?.name}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600">{formatDate(event.createdAt)}</p>
-                      <button
-                        onClick={() => navigate(`/events/${event._id}`)}
-                        className="mt-1 p-1 text-blue-600 hover:text-blue-800"
-                        title="View Event"
-                      >
-                        <FaEye />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-          <FaUsers className="text-blue-600 text-2xl mx-auto mb-2" />
-          <p className="text-2xl font-bold text-gray-800">{stats.totalUsers}</p>
-          <p className="text-blue-600 text-sm">Total Users</p>
-        </div>
-
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-          <FaCalendarAlt className="text-green-600 text-2xl mx-auto mb-2" />
-          <p className="text-2xl font-bold text-gray-800">{stats.totalEvents}</p>
-          <p className="text-green-600 text-sm">Total Events</p>
-        </div>
-
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-          <FaShoppingCart className="text-purple-600 text-2xl mx-auto mb-2" />
-          <p className="text-2xl font-bold text-gray-800">{stats.totalOrders}</p>
-          <p className="text-purple-600 text-sm">Total Orders</p>
-        </div>
-
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-          <FaDollarSign className="text-yellow-600 text-2xl mx-auto mb-2" />
-          <p className="text-2xl font-bold text-gray-800">
-            {formatCurrency(stats.totalRevenue).replace('$', '')}
-          </p>
-          <p className="text-yellow-600 text-sm">Total Revenue</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default BasicDashboard;
+export default AdminDashboardStats;

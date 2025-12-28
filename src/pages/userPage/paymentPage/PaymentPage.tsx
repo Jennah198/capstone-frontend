@@ -1,38 +1,90 @@
-// src/pages/userPage/PaymentPage.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaCreditCard } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FaCreditCard, FaSpinner } from 'react-icons/fa';
+import { useEventContext } from '../../../context/EventContext';
+import { toastError } from '../../../../utility/toast';
 
 const PaymentPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedMethod, setSelectedMethod] = useState('telebirr');
+  const location = useLocation();
+  const { createOrder, pay, user } = useEventContext();
 
-  const orderSummary = {
-    event: "Rophnan Concert",
-    seat: "Section A, Row 5, Seat 12",
-    date: "Dec 31, 2025 at 8:00 LT",
-    ticketPrice: 1200,
-    serviceFee: 50,
-    total: 1250,
-  };
+  // Data passed from seat selection or event detail
+  const { eventId, ticketType, quantity, price, eventTitle } = location.state || {};
+
+  const [loading, setLoading] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState('chapa');
+  const [contactInfo, setContactInfo] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+  });
+
+  const serviceFee = 50;
+  const total = (price || 0) * (quantity || 1) + serviceFee;
+
+  useEffect(() => {
+    if (!eventId) {
+      toastError("Invalid checkout session. Redirecting...");
+      navigate('/');
+    }
+  }, [eventId, navigate]);
 
   const paymentMethods = [
-    { id: 'telebirr', label: 'TeleBirr', color: 'bg-blue-500' },
-    { id: 'cbe', label: 'CBE', color: 'bg-yellow-500' },
-    { id: 'mpessa', label: 'MPessa', color: 'bg-green-500' },
-    { id: 'apollo', label: 'Apollo', color: 'bg-red-500' },
+    { id: 'chapa', label: 'Chapa (Card/Telebirr/CBE)', color: 'bg-green-600' },
   ];
 
-  const handlePayment = () => {
-    // In real app: call API → on success:
-    navigate('/ticket-success');
+  const handlePayment = async () => {
+    if (!user) {
+      toastError("Please login to continue payment");
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const orderData = {
+        event: eventId,
+        ticketType,
+        quantity,
+        totalAmount: total,
+      };
+
+      const orderRes = await createOrder(orderData);
+
+      if (orderRes.success) {
+        const paymentData = {
+          amount: total,
+          email: contactInfo.email,
+          first_name: contactInfo.name.split(' ')[0] || user.name,
+          last_name: contactInfo.name.split(' ').slice(1).join(' ') || 'User',
+          phone_number: contactInfo.phone,
+        };
+
+        const payRes = await pay(paymentData);
+
+        if (payRes.status === "success" && payRes.data?.checkout_url) {
+          window.location.href = payRes.data.checkout_url;
+        } else {
+          throw new Error("Payment initialization failed");
+        }
+      }
+    } catch (err: any) {
+      console.error(err);
+      toastError(err.response?.data?.message || "Something went wrong. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (!eventId) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-5xl mx-auto">
         <div className="text-sm text-gray-500 mb-8">
-          Event → Event Details → Select Seat → <span className="text-green-600 font-medium">Payment Details</span>
+          Event → Event Details → <span className="text-green-600 font-medium">Payment Details</span>
         </div>
 
         <h1 className="text-4xl font-bold text-center mb-2">Complete Your Payment</h1>
@@ -44,35 +96,42 @@ const PaymentPage: React.FC = () => {
             {/* Contact Info */}
             <div className="bg-white rounded-2xl shadow p-8">
               <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  defaultValue="Tomas Melesse"
-                  className="px-6 py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone Number"
-                  defaultValue="+251 91234567890"
-                  className="px-6 py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
+              <div className="grid md:grid-cols-1 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-gray-700">Full Name</label>
+                  <input
+                    type="text"
+                    value={contactInfo.name}
+                    onChange={(e) => setContactInfo({ ...contactInfo, name: e.target.value })}
+                    placeholder="Full Name"
+                    className="px-6 py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={contactInfo.phone}
+                    onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                    placeholder="Phone Number"
+                    className="px-6 py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Payment Method */}
             <div className="bg-white rounded-2xl shadow p-8">
               <h2 className="text-2xl font-bold mb-6">Payment Method</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {paymentMethods.map((method) => (
                   <button
                     key={method.id}
                     onClick={() => setSelectedMethod(method.id)}
-                    className={`py-6 rounded-2xl font-medium transition transform hover:scale-105 ${
-                      selectedMethod === method.id
+                    className={`py-6 rounded-2xl font-medium transition transform hover:scale-105 ${selectedMethod === method.id
                         ? 'bg-green-600 text-white shadow-lg'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {method.label}
                   </button>
@@ -86,27 +145,32 @@ const PaymentPage: React.FC = () => {
             <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
             <div className="space-y-4 text-gray-700">
               <div>
-                <p className="font-bold text-xl">{orderSummary.event}</p>
-                <p>{orderSummary.seat}</p>
-                <p className="text-sm text-gray-500">{orderSummary.date}</p>
+                <p className="font-bold text-xl">{eventTitle}</p>
+                <p>{quantity} {ticketType} Ticket(s)</p>
               </div>
 
               <div className="border-t pt-4">
                 <div className="flex justify-between mb-2">
+                  <span>Tickets</span>
+                  <span className="font-medium">{(price || 0) * (quantity || 1)} ETB</span>
+                </div>
+                <div className="flex justify-between mb-2">
                   <span>Service Fee</span>
-                  <span className="font-medium">{orderSummary.serviceFee}ETB</span>
+                  <span className="font-medium">{serviceFee} ETB</span>
                 </div>
                 <div className="flex justify-between text-xl font-bold">
                   <span>Total</span>
-                  <span className="text-green-600">{orderSummary.total}ETB</span>
+                  <span className="text-green-600">{total} ETB</span>
                 </div>
               </div>
 
               <button
                 onClick={handlePayment}
-                className="w-full mt-8 bg-green-600 hover:bg-green-700 text-white font-bold py-5 rounded-full flex items-center justify-center gap-3 transition text-lg"
+                disabled={loading}
+                className="w-full mt-8 bg-green-600 hover:bg-green-700 text-white font-bold py-5 rounded-full flex items-center justify-center gap-3 transition text-lg disabled:opacity-70"
               >
-                <FaCreditCard /> Pay {orderSummary.total}ETB Now
+                {loading ? <FaSpinner className="animate-spin text-2xl" /> : <FaCreditCard />}
+                {loading ? 'Processing...' : `Pay ${total} ETB Now`}
               </button>
             </div>
           </div>

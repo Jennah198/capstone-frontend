@@ -1,5 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import axios, { AxiosError } from 'axios';
+import React, { useState, type ChangeEvent, type FormEvent } from 'react';
 import { FaPlus, FaSpinner, FaUpload } from 'react-icons/fa';
 import { useEventContext } from '../../context/EventContext';
 import { toastSuccess } from '../../../utility/toast';
@@ -9,7 +8,7 @@ interface FormData {
 }
 
 const CreateCategory: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+  const { createCategory } = useEventContext();
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [formData, setFormData] = useState<FormData>({
@@ -29,8 +28,6 @@ const CreateCategory: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       setImage(file);
-
-      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -42,41 +39,32 @@ const CreateCategory: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setMessage("");
-    setLoading(true);
-
-    // Validation
     if (!formData.name.trim()) {
       setMessage("Name of category is required");
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
     try {
       const data = new FormData();
       data.append('name', formData.name);
       if (image) {
         data.append('image', image);
       }
-      
-      const res = await axios.post(`${BASE_URL}/api/categories/create-category`, data, { withCredentials: true });
 
-      if (res.data.success) {
+      const res = await createCategory(data);
+
+      if (res.success) {
         setFormData({ name: '' });
         setImage(null);
         setImagePreview('');
-        toastSuccess(res.data.message);
+        toastSuccess(res.message);
       } else {
-        setMessage("Failed to create category");
+        setMessage(res.message || "Failed to create category");
       }
-    } catch (err) {
-      console.log(err);
-      const error = err as AxiosError;
-      if (error.response) {
-        const responseData = error.response.data as { message?: string };
-        setMessage(responseData.message || "Failed to create category");
-      } else {
-        setMessage("Server is not responding");
-      }
+    } catch (err: any) {
+      console.error(err);
+      setMessage(err.response?.data?.message || "Server error. Please try again.");
     } finally {
       setLoading(false);
     }

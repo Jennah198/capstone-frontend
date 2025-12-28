@@ -11,6 +11,7 @@ import AdminLayout from './Layout/AdminLayout';
 // Payment Pages
 import SeatSelectionPage from './pages/userPage/paymentPage/SeatSelectionPage';
 import PaymentPage from './pages/userPage/paymentPage/PaymentPage';
+import VerifyPaymentPage from './pages/userPage/paymentPage/VerifyPaymentPage';
 import TicketSuccessPage from './pages/userPage/paymentPage/TicketSuccessPage';
 
 // User Pages
@@ -46,13 +47,16 @@ import AdminOrderListPage from './pages/adminPage/AdminOrderListPage';
 
 import { ApiProvider } from './context/EventContext';
 
+// Components
+import ProtectedRoute from './components/ProtectedRoute';
+
 const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ApiProvider>
         <ToastContainer
           position="top-right"
-          autoClose={5000}
+          autoClose={3000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick
@@ -81,33 +85,38 @@ const App: React.FC = () => {
 
             <Route path="/seat-selection" element={<SeatSelectionPage />} />
             <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/verify-payment" element={<VerifyPaymentPage />} />
             <Route path="/ticket-success" element={<TicketSuccessPage />} />
           </Route>
 
           {/* ==================== ORGANIZER ROUTES ==================== */}
-          <Route path="/organizer" element={<OrganizerLayout />}>
-            <Route index element={<EventList />} /> {/* Default organizer page */}
-            <Route path="create-venue" element={<CreateVenue />} />
-            <Route path="venue-list" element={<VenueList />} />
-            <Route path="update-venue/:id" element={<UpdateVenue />} />
+          <Route element={<ProtectedRoute allowedRoles={['organizer', 'admin']} />}>
+            <Route path="/organizer" element={<OrganizerLayout />}>
+              <Route index element={<EventList />} /> {/* Default organizer page */}
+              <Route path="create-venue" element={<CreateVenue />} />
+              <Route path="venue-list" element={<VenueList />} />
+              <Route path="update-venue/:id" element={<UpdateVenue />} />
 
-            <Route path="create-category" element={<CreateCategory />} />
-            <Route path="category-list" element={<CategoryList />} />
-            <Route path="edit-category/:id" element={<EditCategory />} />
+              <Route path="create-category" element={<CreateCategory />} />
+              <Route path="category-list" element={<CategoryList />} />
+              <Route path="edit-category/:id" element={<EditCategory />} />
 
-            <Route path="create-event" element={<CreateEvent />} />
-            <Route path="event-list" element={<EventList />} />
-            <Route path="event-detail/:id" element={<EventDetail />} />
-            <Route path="edit-event/:id" element={<EditEvent />} />
-            <Route path="event-analytics" element={<EventAnalytics />} />
+              <Route path="create-event" element={<CreateEvent />} />
+              <Route path="event-list" element={<EventList />} />
+              <Route path="event-detail/:id" element={<EventDetail />} />
+              <Route path="edit-event/:id" element={<EditEvent />} />
+              <Route path="event-analytics" element={<EventAnalytics />} />
+            </Route>
           </Route>
 
           {/* ==================== ADMIN ROUTES ==================== */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboardStats />} />
-            <Route path="users" element={<Users />} />
-            <Route path="events" element={<AdminEvents />} />
-            <Route path="admin-orders" element={<AdminOrderListPage />} />
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboardStats />} />
+              <Route path="users" element={<Users />} />
+              <Route path="events" element={<AdminEvents />} />
+              <Route path="admin-orders" element={<AdminOrderListPage />} />
+            </Route>
           </Route>
         </Routes>
       </ApiProvider>

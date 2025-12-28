@@ -1,25 +1,15 @@
 // src/components/Navbar.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaHome, FaSignOutAlt, FaTimes, FaBars } from 'react-icons/fa';
 import { useEventContext } from '../context/EventContext';
 import axios from 'axios';
 
 const Navbar: React.FC = () => {
-  const { user, setUser, BASE_URL, getUserProfile } = useEventContext();
+  const { user, setUser, BASE_URL } = useEventContext();
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      setLoading(true);
-      await getUserProfile();
-      setLoading(false);
-    };
-    fetchUser();
-  }, [getUserProfile, location.pathname]);
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path);
 
@@ -77,22 +67,6 @@ const Navbar: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="w-40 h-8 bg-gray-200 rounded animate-pulse" />
-            <div className="hidden md:flex gap-8">
-              <div className="w-24 h-6 bg-gray-200 rounded animate-pulse" />
-              <div className="w-24 h-6 bg-gray-200 rounded animate-pulse" />
-            </div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
   return (
     <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -115,11 +89,10 @@ const Navbar: React.FC = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(link.to)
-                    ? 'text-green-600 bg-green-50'
-                    : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(link.to)
+                  ? 'text-green-600 bg-green-50'
+                  : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
+                  }`}
               >
                 {link.icon || null} {/* Only show icon if it exists (only Home has one) */}
                 {link.label}
@@ -128,37 +101,41 @@ const Navbar: React.FC = () => {
 
             {/* Auth Section */}
             {user ? (
-              <div className="flex items-center gap-4 border-l border-gray-300 pl-8">
+              <div className="flex items-center gap-6 border-l border-gray-200 pl-8">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {user.name?.charAt(0).toUpperCase() || 'U'}
+                  <div className="relative group cursor-pointer">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-bold text-lg shadow-md ring-2 ring-white ring-offset-2 hover:scale-105 transition-transform duration-200">
+                      {user.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    {/* User Status Dot */}
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{user.name || 'User'}</p>
-                    <p className="text-xs text-gray-500 capitalize">{user.role || 'guest'}</p>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-900 leading-tight">{user.name || 'User'}</span>
+                    <span className="text-[11px] text-green-600 font-semibold uppercase tracking-wider">{user.role || 'Member'}</span>
                   </div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="text-red-600 hover:text-red-700 flex items-center gap-2 font-medium transition"
+                  className="bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-700 p-2.5 rounded-full transition-all duration-300 group"
+                  title="Logout"
                 >
-                  <FaSignOutAlt />
-                  Logout
+                  <FaSignOutAlt className="group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-green-600 font-medium transition"
+                  className="text-gray-700 hover:text-green-600 font-semibold transition"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-3xl font-medium transition shadow"
+                  className="bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white px-7 py-2.5 rounded-[2rem] font-bold transition shadow-lg hover:shadow-green-200/50"
                 >
-                  Sign Up
+                  Get Started
                 </Link>
               </div>
             )}
@@ -185,11 +162,10 @@ const Navbar: React.FC = () => {
                 key={link.to}
                 to={link.to}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition ${
-                  isActive(link.to)
-                    ? 'text-green-600 bg-green-50'
-                    : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition ${isActive(link.to)
+                  ? 'text-green-600 bg-green-50'
+                  : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
+                  }`}
               >
                 {link.icon || null}
                 {link.label}

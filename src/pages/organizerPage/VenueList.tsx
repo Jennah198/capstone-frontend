@@ -1,6 +1,5 @@
 // pages/VenueList.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { FaMapMarkerAlt, FaUsers, FaSpinner, FaPlus, FaImage, FaEdit, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useEventContext } from '../../context/EventContext';
@@ -16,7 +15,7 @@ interface Venue {
 }
 
 const VenueList: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+  const { BASE_URL, getVenues, deleteVenue } = useEventContext();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -26,10 +25,9 @@ const VenueList: React.FC = () => {
     const fetchVenues = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${BASE_URL}/api/venues/get-venue`, { withCredentials: true });
-        
-        if (response.data.success) {
-          setVenues(response.data.venues || []);
+        const res = await getVenues();
+        if (res.success) {
+          setVenues(res.venues || []);
         }
       } catch (error) {
         console.error('Error fetching venues:', error);
@@ -39,7 +37,7 @@ const VenueList: React.FC = () => {
     };
 
     fetchVenues();
-  }, [BASE_URL]);
+  }, [getVenues]);
 
   // Handle delete venue
   const handleDelete = async (venueId: string) => {
@@ -49,9 +47,8 @@ const VenueList: React.FC = () => {
 
     setDeleteLoading(venueId);
     try {
-      const response = await axios.delete(`${BASE_URL}/api/venues/delete-venue/${venueId}`, { withCredentials: true });
-      
-      if (response.data.success) {
+      const res = await deleteVenue(venueId);
+      if (res.success) {
         setVenues(venues.filter(venue => venue._id !== venueId));
       }
     } catch (error) {
@@ -168,7 +165,7 @@ const VenueList: React.FC = () => {
                     <div className="flex items-center text-gray-700">
                       <FaMapMarkerAlt className="mr-2 text-gray-400 shrink-0" />
                       <span className="text-sm truncate">
-                        {venue.city && venue.country 
+                        {venue.city && venue.country
                           ? `${venue.city}, ${venue.country}`
                           : venue.city || venue.country || '—'
                         }

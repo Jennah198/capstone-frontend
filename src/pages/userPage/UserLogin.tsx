@@ -1,11 +1,10 @@
 // pages/UserLogin.tsx
-import axios from 'axios';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEventContext } from '../../context/EventContext';
 
 const UserLogin: React.FC = () => {
-  const { BASE_URL, setUser, getUserProfile } = useEventContext();
+  const { login } = useEventContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -21,24 +20,15 @@ const UserLogin: React.FC = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post(
-        `${BASE_URL}/api/users/login`,
-        { email, password },
-        { withCredentials: true }
-      );
+      const data = await login({ email, password });
 
-      if (res.data.success) {
-        // Set user in context immediately so other components know the user is authenticated
-        setUser(res.data.user);
-        // Try to refresh profile from the server (cookie-based session) — this will be a no-op if cookie isn't set.
-        getUserProfile();
-        const role = res.data.user.role;
-        if (role === 'organizer') navigate('/organizer/event-list');
+      if (data.user) {
+        const role = data.user.role;
+        if (role === 'organizer') navigate('/organizer');
         else if (role === 'admin') navigate('/admin');
         else navigate('/');
       }
     } catch (err: any) {
-      setLoading(false);
       setMessage(err.response?.data?.message || 'Server error. Try later!');
     } finally {
       setLoading(false);
@@ -46,7 +36,7 @@ const UserLogin: React.FC = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${BASE_URL}/api/users/google`; // adjust if needed
+    // window.location.href = `${BASE_URL}/api/auth/google`; // Adjust if needed
   };
 
   return (

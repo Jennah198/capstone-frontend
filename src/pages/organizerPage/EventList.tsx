@@ -1,7 +1,6 @@
 // pages/EventList.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -50,7 +49,7 @@ interface Filters {
 }
 
 const EventList: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+  const { BASE_URL, getAllEvents, getCategories, deleteEvent } = useEventContext();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -69,13 +68,9 @@ const EventList: React.FC = () => {
         search: searchTerm,
       };
 
-      const response = await axios.get(`${BASE_URL}/api/events/get-all-events`, {
-        params,
-        withCredentials: true,
-      });
-
-      if (response.data.success) {
-        setEvents(response.data.data || []);
+      const res = await getAllEvents(params);
+      if (res.success) {
+        setEvents(res.data || []);
       }
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -86,11 +81,9 @@ const EventList: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/categories/get-category`, {
-        withCredentials: true,
-      });
-      if (response.data.success) {
-        setCategories(response.data.categories || []);
+      const res = await getCategories();
+      if (res.success) {
+        setCategories(res.categories || []);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -112,11 +105,7 @@ const EventList: React.FC = () => {
   };
 
   const clearFilters = () => {
-    setFilters({
-      status: 'all',
-      category: '',
-      dateRange: 'all',
-    });
+    setFilters({ status: 'all', category: '', dateRange: 'all' });
     setSearchTerm('');
   };
 
@@ -158,10 +147,8 @@ const EventList: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      const response = await axios.delete(`${BASE_URL}/api/events/delete-event/${eventId}`, {
-        withCredentials: true,
-      });
-      if (response.data.success) {
+      const res = await deleteEvent(eventId);
+      if (res.success) {
         fetchEvents();
       }
     } catch (error) {

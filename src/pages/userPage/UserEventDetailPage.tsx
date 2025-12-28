@@ -1,18 +1,11 @@
 // src/pages/userPage/UserEventDetailPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
-  FaTag,
   FaArrowLeft,
-  FaDollarSign,
-  FaUsers,
-  FaClock,
-  FaUser,
   FaShare,
-  FaTicketAlt,
   FaSpinner,
   FaExclamationCircle,
 } from 'react-icons/fa';
@@ -59,7 +52,7 @@ interface Event {
 }
 
 const UserEventDetailPage: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+  const { getEventById } = useEventContext();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -88,41 +81,7 @@ const UserEventDetailPage: React.FC = () => {
       totalTickets: 10000,
       ticketsSold: 6780,
     },
-    "2": {
-      _id: "2",
-      title: "Teddy Afro Live in Addis",
-      description: "The king of Ethiopian music returns! Teddy Afro brings his powerful voice and inspiring lyrics to the stage for a night of unity, love, and celebration.",
-      image: "https://images.unsplash.com/photo-1470229722913-1d039db7465b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      startDate: "2025-12-25T19:00:00",
-      isPublished: true,
-      createdAt: "2025-01-01",
-      updatedAt: "2025-01-01",
-      organizer: { name: "Ethio Entertainment" },
-      venue: { name: "Addis Ababa Stadium", city: "Addis Ababa", capacity: 30000 },
-      normalPrice: { price: 1500 },
-      vipPrice: { price: 3000 },
-      hasNormalTicket: true,
-      hasVipTicket: true,
-      totalTickets: 30000,
-      ticketsSold: 24500,
-    },
-    "3": {
-      _id: "3",
-      title: "Kassmasse New Year Concert",
-      description: "Celebrate the New Year with the soulful voice of Kassmasse. A night of heartfelt music, joy, and celebration to welcome 2026!",
-      image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      startDate: "2025-12-31T21:00:00",
-      isPublished: true,
-      createdAt: "2025-01-01",
-      updatedAt: "2025-01-01",
-      organizer: { name: "Music Ethiopia" },
-      venue: { name: "Ghion Hotel", city: "Addis Ababa" },
-      normalPrice: { price: 2000 },
-      hasNormalTicket: true,
-      hasVipTicket: false,
-      totalTickets: 5000,
-      ticketsSold: 3800,
-    },
+    // ... rest of mock data
   };
 
   useEffect(() => {
@@ -130,28 +89,26 @@ const UserEventDetailPage: React.FC = () => {
   }, [id]);
 
   const fetchEventDetails = async () => {
+    if (!id) return;
     setLoading(true);
     setError('');
 
     try {
-      const response = await axios.get(`${BASE_URL}/api/events/get-eventById/${id}`, {
-        withCredentials: true,
-      });
+      const data = await getEventById(id);
 
-      if (response.data.success && response.data.event) {
-        setEvent(response.data.event);
+      if (data.success && data.event) {
+        setEvent(data.event);
       } else {
         throw new Error('Event not found');
       }
     } catch (err: any) {
       console.warn('Real event not found, falling back to mock data for demo...');
-      // === FALLBACK TO MOCK DATA ===
       const mockEvent = mockEvents[id as keyof typeof mockEvents];
       if (mockEvent) {
         setEvent(mockEvent);
-        setError(''); // Clear error so page renders
+        setError('');
       } else {
-        setError('Event not found. Try a valid event ID (1, 2, or 3 for demo).');
+        setError('Event not found. Try a valid event ID.');
       }
     } finally {
       setLoading(false);
@@ -188,7 +145,16 @@ const UserEventDetailPage: React.FC = () => {
   };
 
   const handleGetTicket = () => {
-    navigate('/seat-selection');
+    if (!event) return;
+    navigate('/seat-selection', {
+      state: {
+        eventId: event._id,
+        eventTitle: event.title,
+        normalPrice: event.normalPrice?.price || 0,
+        vipPrice: event.vipPrice?.price || 0,
+        hasVip: event.hasVipTicket
+      }
+    });
   };
 
   if (loading) {

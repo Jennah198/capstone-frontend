@@ -1,6 +1,5 @@
 // pages/RegisterPage.tsx
 import React, { useState } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useEventContext } from "../../context/EventContext";
 import { toastSuccess } from "../../../utility/toast";
@@ -14,7 +13,7 @@ interface FormData {
 }
 
 const RegisterPage: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+  const { register } = useEventContext();
   const [form, setForm] = useState<FormData>({
     name: "",
     email: "",
@@ -50,18 +49,16 @@ const RegisterPage: React.FC = () => {
     }
 
     try {
-      const res = await axios.post(`${BASE_URL}/api/users/register`, {
-        ...form,
-        role: type === "admin" ? "organizer" : "user", // adjust based on your backend
-      });
+      const data = await register(form);
 
-      if (res.data.success) {
-        toastSuccess(res.data?.message || "Registration successful!");
+      if (data) {
+        toastSuccess(data.message || "Registration successful!");
         navigate('/login');
       }
     } catch (err: any) {
-      setLoading(false);
       setMessage(err.response?.data?.message || "Server error. Try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 

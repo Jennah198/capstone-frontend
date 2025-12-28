@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosError } from 'axios';
 import { FaTag, FaSpinner, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useEventContext } from '../../context/EventContext';
@@ -13,7 +12,7 @@ interface Category {
 }
 
 const CategoryList: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+  const { BASE_URL, getCategories, deleteCategory } = useEventContext();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -23,10 +22,9 @@ const CategoryList: React.FC = () => {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${BASE_URL}/api/categories/get-category`, { withCredentials: true });
-        
-        if (response.data.success) {
-          setCategories(response.data.categories || []);
+        const res = await getCategories();
+        if (res.success) {
+          setCategories(res.categories || []);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -36,7 +34,7 @@ const CategoryList: React.FC = () => {
     };
 
     fetchCategories();
-  }, [BASE_URL]);
+  }, [getCategories]);
 
   // Handle delete category
   const handleDelete = async (categoryId: string) => {
@@ -46,9 +44,8 @@ const CategoryList: React.FC = () => {
 
     setDeleteLoading(categoryId);
     try {
-      const response = await axios.delete(`${BASE_URL}/api/categories/delete-category/${categoryId}`, { withCredentials: true });
-      
-      if (response.data.success) {
+      const res = await deleteCategory(categoryId);
+      if (res.success) {
         setCategories(categories.filter(category => category._id !== categoryId));
       }
     } catch (error) {
@@ -103,8 +100,8 @@ const CategoryList: React.FC = () => {
           /* Categories Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
-              <div 
-                key={category._id} 
+              <div
+                key={category._id}
                 className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {/* Category Image */}
