@@ -316,11 +316,19 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
   // Orders
   const createOrder = async (data: any) => {
-    return (
-      await axios.post(`${BASE_URL}/api/orders/create-order`, data, {
-        withCredentials: true,
-      })
-    ).data;
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/api/orders/create-order`,
+        data,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      // Re-throw the error so it can be caught in the component
+      throw error;
+    }
   };
 
   const getUserOrders = async () => {

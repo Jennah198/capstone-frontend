@@ -178,6 +178,20 @@ const CreateEvent: React.FC = () => {
       showMessage("error", "Category is required");
       return false;
     }
+    if (
+      !formData.normalPrice.quantity ||
+      parseInt(formData.normalPrice.quantity) <= 0
+    ) {
+      showMessage("error", "Normal ticket quantity must be greater than 0");
+      return false;
+    }
+    if (
+      !formData.vipPrice.quantity ||
+      parseInt(formData.vipPrice.quantity) <= 0
+    ) {
+      showMessage("error", "VIP ticket quantity must be greater than 0");
+      return false;
+    }
     return true;
   };
 

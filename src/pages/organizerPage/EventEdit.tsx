@@ -271,12 +271,20 @@ const EditEvent: React.FC = () => {
       showMessage("error", "Quantity is required for Normal Ticket");
       return false;
     }
+    if (parseInt(formData.normalPrice.quantity) <= 0) {
+      showMessage("error", "Normal ticket quantity must be greater than 0");
+      return false;
+    }
     if (!formData.vipPrice.price) {
       showMessage("error", "VIP price is required");
       return false;
     }
     if (!formData.vipPrice.quantity) {
       showMessage("error", "Quantity is required for VIP Ticket");
+      return false;
+    }
+    if (parseInt(formData.vipPrice.quantity) <= 0) {
+      showMessage("error", "VIP ticket quantity must be greater than 0");
       return false;
     }
     if (

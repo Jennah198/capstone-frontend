@@ -64,7 +64,7 @@ const Organizer: React.FC = () => {
   const handleLogout = async () => {
     try {
       const response = await axios.post(
-        `${BASE_URL}/api/users/logout`,
+        `${BASE_URL}/api/auth/logout`,
         {},
         { withCredentials: true }
       );

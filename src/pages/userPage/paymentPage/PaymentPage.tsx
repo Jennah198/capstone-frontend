@@ -75,7 +75,13 @@ const PaymentPage: React.FC = () => {
         const payRes = await pay(paymentData);
 
         if (payRes.success) {
-          navigate("/ticket-success");
+          navigate("/ticket-success", {
+            state: {
+              order: payRes.order,
+              tickets: payRes.tickets,
+              event: payRes.event,
+            },
+          });
         } else {
           throw new Error("Payment failed");
         }

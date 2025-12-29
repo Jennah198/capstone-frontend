@@ -90,10 +90,7 @@ const HomePage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 py-16">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Browse By Category</h2>
-          <Link
-            to="/categories-list"
-            className="text-green-600 hover:underline"
-          >
+          <Link to="/categories" className="text-green-600 hover:underline">
             View All ({categories.length})
           </Link>
         </div>

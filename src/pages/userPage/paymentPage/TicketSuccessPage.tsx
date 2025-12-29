@@ -1,17 +1,49 @@
 // src/pages/userPage/TicketSuccessPage.tsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaCheckCircle, FaDownload, FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaUser } from 'react-icons/fa';
+import React, { useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  FaCheckCircle,
+  FaDownload,
+  FaCalendarAlt,
+  FaMapMarkerAlt,
+  FaTicketAlt,
+  FaUser,
+} from "react-icons/fa";
+import QRCode from "react-qr-code";
+import html2canvas from "html2canvas";
 
 const TicketSuccessPage: React.FC = () => {
-  // In real app, get this from context or location state
-  const ticketData = {
-    eventTitle: "Aster Awoke Grand Last Concert",
-    date: "Saturday, December 31, 2025 at 8:00 LT",
-    location: "Millennium Hall, Bole, Addis Ababa, Ethiopia",
-    ticketType: "VIP Ticket",
-    seat: "Section A, Row 5, Seat 12",
-    ticketId: "1234-5678-9012",
+  const location = useLocation();
+  const navigate = useNavigate();
+  const ticketRef = useRef<HTMLDivElement>(null);
+
+  const { order, tickets, event } = location.state || {};
+
+  if (!event || !order || !tickets) {
+    navigate("/");
+    return null;
+  }
+
+  const ticket = tickets[0]; // Show first ticket
+
+  const handleDownload = () => {
+    if (ticketRef.current) {
+      html2canvas(ticketRef.current).then((canvas) => {
+        const link = document.createElement("a");
+        link.download = `ticket-${ticket?.ticketCode}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   return (
@@ -19,30 +51,45 @@ const TicketSuccessPage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Breadcrumb */}
         <div className="text-sm text-gray-500 mb-6">
-          Event → Event Details → Select Seat → Payment Details → <span className="text-green-600 font-medium">Completion</span>
+          Event → Event Details → Select Seat → Payment Details →{" "}
+          <span className="text-green-600 font-medium">Completion</span>
         </div>
 
         {/* Success Header */}
         <div className="text-center mb-10">
           <FaCheckCircle className="text-green-600 text-6xl mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Congratulation Your Ticket Is Booked!</h1>
-          <button className="mt-6 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-full flex items-center gap-3 mx-auto transition">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Congratulations! Your Ticket Is Booked!
+          </h1>
+          <button
+            onClick={handleDownload}
+            className="mt-6 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-full flex items-center gap-3 mx-auto transition"
+          >
             <FaDownload /> Download Ticket
           </button>
         </div>
 
         {/* Ticket Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">{ticketData.eventTitle}</h2>
+        <div
+          ref={ticketRef}
+          className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto border-4 border-green-200"
+        >
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">
+            {event.title}
+          </h2>
 
           <div className="grid md:grid-cols-2 gap-8 text-gray-700">
-            {/* Left - QR Placeholder */}
+            {/* Left - QR Code */}
             <div className="flex flex-col items-center">
-              <div className="bg-gray-200 border-2 border-dashed rounded-xl w-48 h-48 mb-4" />
+              <div className="bg-white border-2 border-gray-300 rounded-xl p-4 mb-4">
+                <QRCode value={ticket.ticketCode} size={160} />
+              </div>
               <p className="text-center text-sm text-gray-500">
                 Scan the QR code at the Event Entrance
               </p>
-              <p className="mt-2 font-mono text-lg">ID: {ticketData.ticketId}</p>
+              <p className="mt-2 font-mono text-lg font-semibold">
+                ID: {ticket.ticketCode}
+              </p>
             </div>
 
             {/* Right - Details */}
@@ -53,7 +100,9 @@ const TicketSuccessPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-medium">Date and Time</p>
-                  <p className="text-gray-600">{ticketData.date}</p>
+                  <p className="text-gray-600">
+                    {formatDate(event.date)} at {event.time}
+                  </p>
                 </div>
               </div>
 
@@ -63,7 +112,9 @@ const TicketSuccessPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-medium">Location</p>
-                  <p className="text-gray-600">{ticketData.location}</p>
+                  <p className="text-gray-600">
+                    {event.venue?.name}, {event.venue?.location}
+                  </p>
                 </div>
               </div>
 
@@ -74,7 +125,9 @@ const TicketSuccessPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-medium">Ticket Type</p>
-                    <p className="text-gray-900 font-semibold">{ticketData.ticketType}</p>
+                    <p className="text-gray-900 font-semibold">
+                      {order.ticketType}
+                    </p>
                   </div>
                 </div>
 
@@ -83,8 +136,10 @@ const TicketSuccessPage: React.FC = () => {
                     <FaUser className="text-indigo-600 text-xl" />
                   </div>
                   <div>
-                    <p className="font-medium">Seat Place</p>
-                    <p className="text-gray-900 font-semibold">{ticketData.seat}</p>
+                    <p className="font-medium">Ticket Code</p>
+                    <p className="text-gray-900 font-semibold">
+                      {ticket.ticketCode}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -97,11 +152,36 @@ const TicketSuccessPage: React.FC = () => {
             <Link to="/" className="text-green-600 hover:underline font-medium">
               Browse More Events
             </Link>
-            <Link to="/my-order" className="text-green-600 hover:underline font-medium">
+            <Link
+              to="/my-order"
+              className="text-green-600 hover:underline font-medium"
+            >
               View My Tickets
             </Link>
           </div>
         </div>
+
+        {/* Show all tickets if multiple */}
+        {tickets.length > 1 && (
+          <div className="mt-8 text-center">
+            <p className="text-gray-600 mb-4">
+              You have {tickets.length} tickets. Download each one individually.
+            </p>
+            {tickets.map((t: any, index: number) => (
+              <div key={t._id} className="inline-block mx-2">
+                <button
+                  onClick={() => {
+                    // For multiple, perhaps need separate refs or something, but for now, download first
+                    handleDownload();
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                >
+                  Download Ticket {index + 1}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
