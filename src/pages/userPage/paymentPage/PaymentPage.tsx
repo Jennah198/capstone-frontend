@@ -68,6 +68,7 @@ const PaymentPage: React.FC = () => {
           orderId: orderRes.order._id,
           first_name: firstName,
           last_name: lastName,
+          email: user.email,
           phone_number: contactInfo.phone.trim(),
         };
 
