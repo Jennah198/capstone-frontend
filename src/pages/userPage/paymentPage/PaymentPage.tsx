@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { FaCreditCard, FaSpinner } from 'react-icons/fa';
-import { useEventContext } from '../../../context/EventContext';
-import { toastError } from '../../../../utility/toast';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaCreditCard, FaSpinner } from "react-icons/fa";
+import { useEventContext } from "../../../context/EventContext";
+import { toastError } from "../../../../utility/toast";
 
 const PaymentPage: React.FC = () => {
   const navigate = useNavigate();
@@ -10,14 +10,14 @@ const PaymentPage: React.FC = () => {
   const { createOrder, pay, user } = useEventContext();
 
   // Data passed from seat selection or event detail
-  const { eventId, ticketType, quantity, price, eventTitle } = location.state || {};
+  const { eventId, ticketType, quantity, price, eventTitle } =
+    location.state || {};
 
   const [loading, setLoading] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState('chapa');
+  const [selectedMethod, setSelectedMethod] = useState("chapa");
   const [contactInfo, setContactInfo] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
+    name: user?.name || "",
+    phone: user?.phone || "",
   });
 
   const serviceFee = 50;
@@ -26,18 +26,24 @@ const PaymentPage: React.FC = () => {
   useEffect(() => {
     if (!eventId) {
       toastError("Invalid checkout session. Redirecting...");
-      navigate('/');
+      navigate("/");
     }
   }, [eventId, navigate]);
 
   const paymentMethods = [
-    { id: 'chapa', label: 'Chapa (Card/Telebirr/CBE)', color: 'bg-green-600' },
+    { id: "chapa", label: "Chapa (Card/Telebirr/CBE)", color: "bg-green-600" },
   ];
 
   const handlePayment = async () => {
     if (!user) {
       toastError("Please login to continue payment");
-      navigate('/login');
+      navigate("/login");
+      return;
+    }
+
+    // Validate contact information
+    if (!contactInfo.name.trim() || !contactInfo.phone.trim()) {
+      toastError("Please fill in all contact information");
       return;
     }
 
@@ -45,7 +51,7 @@ const PaymentPage: React.FC = () => {
       setLoading(true);
 
       const orderData = {
-        event: eventId,
+        eventId,
         ticketType,
         quantity,
         totalAmount: total,
@@ -54,12 +60,15 @@ const PaymentPage: React.FC = () => {
       const orderRes = await createOrder(orderData);
 
       if (orderRes.success) {
+        const nameParts = contactInfo.name.trim().split(" ");
+        const firstName = nameParts[0] || "User";
+        const lastName = nameParts.slice(1).join(" ") || "User";
+
         const paymentData = {
-          amount: total,
-          email: contactInfo.email,
-          first_name: contactInfo.name.split(' ')[0] || user.name,
-          last_name: contactInfo.name.split(' ').slice(1).join(' ') || 'User',
-          phone_number: contactInfo.phone,
+          orderId: orderRes.order._id,
+          first_name: firstName,
+          last_name: lastName,
+          phone_number: contactInfo.phone.trim(),
         };
 
         const payRes = await pay(paymentData);
@@ -71,8 +80,19 @@ const PaymentPage: React.FC = () => {
         }
       }
     } catch (err: any) {
-      console.error(err);
-      toastError(err.response?.data?.message || "Something went wrong. Try again.");
+      console.error("Payment error:", err);
+      console.error("Error response:", err.response);
+      console.error("Error response data:", err.response?.data);
+
+      let errorMessage = "Something went wrong. Try again.";
+
+      if (err.response?.status === 409 && err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+
+      toastError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -84,11 +104,16 @@ const PaymentPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-5xl mx-auto">
         <div className="text-sm text-gray-500 mb-8">
-          Event → Event Details → <span className="text-green-600 font-medium">Payment Details</span>
+          Event → Event Details →{" "}
+          <span className="text-green-600 font-medium">Payment Details</span>
         </div>
 
-        <h1 className="text-4xl font-bold text-center mb-2">Complete Your Payment</h1>
-        <p className="text-center text-gray-600 mb-12">Finalize your Payments in a secure way</p>
+        <h1 className="text-4xl font-bold text-center mb-2">
+          Complete Your Payment
+        </h1>
+        <p className="text-center text-gray-600 mb-12">
+          Finalize your Payments in a secure way
+        </p>
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Left - Contact & Payment */}
@@ -98,21 +123,29 @@ const PaymentPage: React.FC = () => {
               <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
               <div className="grid md:grid-cols-1 gap-6">
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">Full Name</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Full Name
+                  </label>
                   <input
                     type="text"
                     value={contactInfo.name}
-                    onChange={(e) => setContactInfo({ ...contactInfo, name: e.target.value })}
+                    onChange={(e) =>
+                      setContactInfo({ ...contactInfo, name: e.target.value })
+                    }
                     placeholder="Full Name"
                     className="px-6 py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     value={contactInfo.phone}
-                    onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                    onChange={(e) =>
+                      setContactInfo({ ...contactInfo, phone: e.target.value })
+                    }
                     placeholder="Phone Number"
                     className="px-6 py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
@@ -128,10 +161,11 @@ const PaymentPage: React.FC = () => {
                   <button
                     key={method.id}
                     onClick={() => setSelectedMethod(method.id)}
-                    className={`py-6 rounded-2xl font-medium transition transform hover:scale-105 ${selectedMethod === method.id
-                        ? 'bg-green-600 text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                    className={`py-6 rounded-2xl font-medium transition transform hover:scale-105 ${
+                      selectedMethod === method.id
+                        ? "bg-green-600 text-white shadow-lg"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                   >
                     {method.label}
                   </button>
@@ -146,13 +180,17 @@ const PaymentPage: React.FC = () => {
             <div className="space-y-4 text-gray-700">
               <div>
                 <p className="font-bold text-xl">{eventTitle}</p>
-                <p>{quantity} {ticketType} Ticket(s)</p>
+                <p>
+                  {quantity} {ticketType} Ticket(s)
+                </p>
               </div>
 
               <div className="border-t pt-4">
                 <div className="flex justify-between mb-2">
                   <span>Tickets</span>
-                  <span className="font-medium">{(price || 0) * (quantity || 1)} ETB</span>
+                  <span className="font-medium">
+                    {(price || 0) * (quantity || 1)} ETB
+                  </span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span>Service Fee</span>
@@ -169,8 +207,12 @@ const PaymentPage: React.FC = () => {
                 disabled={loading}
                 className="w-full mt-8 bg-green-600 hover:bg-green-700 text-white font-bold py-5 rounded-full flex items-center justify-center gap-3 transition text-lg disabled:opacity-70"
               >
-                {loading ? <FaSpinner className="animate-spin text-2xl" /> : <FaCreditCard />}
-                {loading ? 'Processing...' : `Pay ${total} ETB Now`}
+                {loading ? (
+                  <FaSpinner className="animate-spin text-2xl" />
+                ) : (
+                  <FaCreditCard />
+                )}
+                {loading ? "Processing..." : `Pay ${total} ETB Now`}
               </button>
             </div>
           </div>
