@@ -1,5 +1,5 @@
 // src/pages/userPage/SuppliersPage.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FaStar,
@@ -11,11 +11,19 @@ import {
   FaPlus,
   FaEdit,
   FaTrash,
+  FaSpinner,
 } from "react-icons/fa";
 import { useEventContext } from "../../context/EventContext";
 
 const SuppliersPage: React.FC = () => {
-  const { user } = useEventContext();
+  const {
+    user,
+    getPopularSuppliers,
+    getTrendingSuppliers,
+    createSupplier,
+    updateSupplier,
+    deleteSupplier,
+  } = useEventContext();
   const isAdmin = user?.role === "admin";
 
   const [showModal, setShowModal] = useState(false);
@@ -23,6 +31,37 @@ const SuppliersPage: React.FC = () => {
   const [supplierName, setSupplierName] = useState("");
   const [supplierCategory, setSupplierCategory] = useState("");
   const [supplierLocation, setSupplierLocation] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // Real data from API
+  const [popularPhotographers, setPopularPhotographers] = useState<any[]>([]);
+  const [trendingDesigners, setTrendingDesigners] = useState<any[]>([]);
+
+  // Fetch suppliers on component mount
+  useEffect(() => {
+    fetchSuppliers();
+  }, []);
+
+  const fetchSuppliers = async () => {
+    try {
+      setLoading(true);
+      const [popularRes, trendingRes] = await Promise.all([
+        getPopularSuppliers(),
+        getTrendingSuppliers(),
+      ]);
+
+      if (popularRes.success) {
+        setPopularPhotographers(popularRes.suppliers);
+      }
+      if (trendingRes.success) {
+        setTrendingDesigners(trendingRes.suppliers);
+      }
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = [
     { name: "PHOTOGRAPHER / VIDEOGRAPHER", icon: <FaCamera /> },
@@ -33,45 +72,6 @@ const SuppliersPage: React.FC = () => {
     { name: "MAKEUP ARTIST", icon: <FaPalette /> },
     { name: "BAR SERVICES", icon: <FaUtensils /> },
   ];
-
-  // Make suppliers editable
-  const [popularPhotographers, setPopularPhotographers] = useState([
-    { id: 1, name: "ABU DHABI", rating: 5, reviews: 22 },
-    { id: 2, name: "STUDIO LIGHT", rating: 5, reviews: 22 },
-    { id: 3, name: "CAPTURE MOMENTS", rating: 5, reviews: 22 },
-    { id: 4, name: "LENS & LOVE", rating: 5, reviews: 22 },
-  ]);
-
-  const [trendingDesigners, setTrendingDesigners] = useState([
-    {
-      id: 1,
-      name: "LOREM IPSUM",
-      location: "ABU DHABI",
-      rating: 5,
-      reviews: 22,
-    },
-    {
-      id: 2,
-      name: "DESIGN STUDIO",
-      location: "ABU DHABI",
-      rating: 5,
-      reviews: 22,
-    },
-    {
-      id: 3,
-      name: "FASHION HUB",
-      location: "ABU DHABI",
-      rating: 5,
-      reviews: 22,
-    },
-    {
-      id: 4,
-      name: "ELEGANT THREADS",
-      location: "ABU DHABI",
-      rating: 5,
-      reviews: 22,
-    },
-  ]);
 
   // Admin functions
   const handleAddSupplier = () => {
@@ -93,69 +93,59 @@ const SuppliersPage: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDeleteSupplier = (
-    id: number,
+  const handleDeleteSupplier = async (
+    id: string,
     type: "photographer" | "designer"
   ) => {
-    if (type === "photographer") {
-      setPopularPhotographers((prev) => prev.filter((s) => s.id !== id));
-    } else {
-      setTrendingDesigners((prev) => prev.filter((s) => s.id !== id));
+    if (!confirm("Are you sure you want to delete this supplier?")) return;
+
+    try {
+      await deleteSupplier(id);
+      // Refresh data
+      fetchSuppliers();
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+      alert("Failed to delete supplier");
     }
   };
 
-  const handleSaveSupplier = () => {
+  const handleSaveSupplier = async () => {
     if (!supplierName.trim()) return;
 
-    if (editingSupplier) {
-      // Update existing
-      if (editingSupplier.type === "photographer") {
-        setPopularPhotographers((prev) =>
-          prev.map((s) =>
-            s.id === editingSupplier.id ? { ...s, name: supplierName } : s
-          )
-        );
-      } else {
-        setTrendingDesigners((prev) =>
-          prev.map((s) =>
-            s.id === editingSupplier.id
-              ? { ...s, name: supplierName, location: supplierLocation }
-              : s
-          )
-        );
-      }
-    } else {
-      // Add new
-      const newId = Date.now();
-      if (supplierCategory === "photographer") {
-        setPopularPhotographers((prev) => [
-          ...prev,
-          {
-            id: newId,
-            name: supplierName,
-            rating: 5,
-            reviews: 0,
-          },
-        ]);
-      } else {
-        setTrendingDesigners((prev) => [
-          ...prev,
-          {
-            id: newId,
-            name: supplierName,
-            location: supplierLocation || "ABU DHABI",
-            rating: 5,
-            reviews: 0,
-          },
-        ]);
-      }
-    }
+    try {
+      const formData = new FormData();
+      formData.append("name", supplierName);
+      formData.append(
+        "category",
+        supplierCategory === "photographer" ? "photographer" : "designer"
+      );
+      formData.append("location", supplierLocation);
+      formData.append(
+        "isPopular",
+        supplierCategory === "photographer" ? "true" : "false"
+      );
+      formData.append(
+        "isTrending",
+        supplierCategory === "designer" ? "true" : "false"
+      );
 
-    setShowModal(false);
-    setEditingSupplier(null);
-    setSupplierName("");
-    setSupplierCategory("");
-    setSupplierLocation("");
+      if (editingSupplier) {
+        await updateSupplier(editingSupplier._id, formData);
+      } else {
+        await createSupplier(formData);
+      }
+
+      setShowModal(false);
+      setEditingSupplier(null);
+      setSupplierName("");
+      setSupplierCategory("");
+      setSupplierLocation("");
+      // Refresh data
+      fetchSuppliers();
+    } catch (error) {
+      console.error("Error saving supplier:", error);
+      alert("Failed to save supplier");
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -230,41 +220,60 @@ const SuppliersPage: React.FC = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {popularPhotographers.map((supplier) => (
-              <div
-                key={supplier.id}
-                className="bg-white rounded-2xl shadow hover:shadow-xl transition p-6 text-center relative"
-              >
-                {isAdmin && (
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    <button
-                      onClick={() =>
-                        handleEditSupplier(supplier, "photographer")
-                      }
-                      className="bg-blue-500 hover:bg-blue-600 text-white p-1 rounded"
-                    >
-                      <FaEdit size={12} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDeleteSupplier(supplier.id, "photographer")
-                      }
-                      className="bg-red-500 hover:bg-red-600 text-white p-1 rounded"
-                    >
-                      <FaTrash size={12} />
-                    </button>
-                  </div>
-                )}
-                <div className="w-32 h-32 mx-auto bg-gray-200 rounded-full mb-4" />
-                <h3 className="font-bold text-lg mb-2">{supplier.name}</h3>
-                <div className="flex justify-center gap-1 mb-2">
-                  {renderStars(supplier.rating)}
-                </div>
-                <p className="text-sm text-gray-600">
-                  ({supplier.reviews} reviews)
-                </p>
+            {loading ? (
+              <div className="col-span-full flex justify-center items-center py-12">
+                <FaSpinner className="animate-spin text-green-600 text-4xl" />
+                <span className="ml-4 text-gray-600">Loading suppliers...</span>
               </div>
-            ))}
+            ) : popularPhotographers.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-600">No popular photographers found.</p>
+                {isAdmin && (
+                  <button
+                    onClick={handleAddSupplier}
+                    className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                  >
+                    Add First Supplier
+                  </button>
+                )}
+              </div>
+            ) : (
+              popularPhotographers.map((supplier) => (
+                <div
+                  key={supplier._id}
+                  className="bg-white rounded-2xl shadow hover:shadow-xl transition p-6 text-center relative"
+                >
+                  {isAdmin && (
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      <button
+                        onClick={() =>
+                          handleEditSupplier(supplier, "photographer")
+                        }
+                        className="bg-blue-500 hover:bg-blue-600 text-white p-1 rounded"
+                      >
+                        <FaEdit size={12} />
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleDeleteSupplier(supplier._id, "photographer")
+                        }
+                        className="bg-red-500 hover:bg-red-600 text-white p-1 rounded"
+                      >
+                        <FaTrash size={12} />
+                      </button>
+                    </div>
+                  )}
+                  <div className="w-32 h-32 mx-auto bg-gray-200 rounded-full mb-4" />
+                  <h3 className="font-bold text-lg mb-2">{supplier.name}</h3>
+                  <div className="flex justify-center gap-1 mb-2">
+                    {renderStars(supplier.rating)}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    ({supplier.reviews} reviews)
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -290,42 +299,64 @@ const SuppliersPage: React.FC = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {trendingDesigners.map((designer) => (
-              <div
-                key={designer.id}
-                className="bg-white rounded-2xl shadow hover:shadow-xl transition p-6 text-center relative"
-              >
-                {isAdmin && (
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    <button
-                      onClick={() => handleEditSupplier(designer, "designer")}
-                      className="bg-blue-500 hover:bg-blue-600 text-white p-1 rounded"
-                    >
-                      <FaEdit size={12} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDeleteSupplier(designer.id, "designer")
-                      }
-                      className="bg-red-500 hover:bg-red-600 text-white p-1 rounded"
-                    >
-                      <FaTrash size={12} />
-                    </button>
-                  </div>
-                )}
-                <div className="w-32 h-32 mx-auto bg-gray-200 rounded-full mb-4" />
-                <h3 className="font-bold text-lg mb-2">{designer.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">
-                  {designer.location}
-                </p>
-                <div className="flex justify-center gap-1">
-                  {renderStars(designer.rating)}
-                </div>
-                <p className="text-sm text-gray-600">
-                  ({designer.reviews} reviews)
-                </p>
+            {loading ? (
+              <div className="col-span-full flex justify-center items-center py-12">
+                <FaSpinner className="animate-spin text-green-600 text-4xl" />
+                <span className="ml-4 text-gray-600">Loading designers...</span>
               </div>
-            ))}
+            ) : trendingDesigners.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-600">No trending designers found.</p>
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      setSupplierCategory("designer");
+                      handleAddSupplier();
+                    }}
+                    className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                  >
+                    Add First Designer
+                  </button>
+                )}
+              </div>
+            ) : (
+              trendingDesigners.map((designer) => (
+                <div
+                  key={designer._id}
+                  className="bg-white rounded-2xl shadow hover:shadow-xl transition p-6 text-center relative"
+                >
+                  {isAdmin && (
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      <button
+                        onClick={() => handleEditSupplier(designer, "designer")}
+                        className="bg-blue-500 hover:bg-blue-600 text-white p-1 rounded"
+                      >
+                        <FaEdit size={12} />
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleDeleteSupplier(designer._id, "designer")
+                        }
+                        className="bg-red-500 hover:bg-red-600 text-white p-1 rounded"
+                      >
+                        <FaTrash size={12} />
+                      </button>
+                    </div>
+                  )}
+                  <div className="w-32 h-32 mx-auto bg-gray-200 rounded-full mb-4" />
+                  <h3 className="font-bold text-lg mb-2">{designer.name}</h3>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {designer.location}
+                  </p>
+                  <div className="flex justify-center gap-1">
+                    {renderStars(designer.rating)}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    ({designer.reviews} reviews)
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

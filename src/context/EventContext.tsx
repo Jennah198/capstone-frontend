@@ -80,6 +80,14 @@ interface ApiContextType {
   getMedia: () => Promise<any>;
   createMedia: (formData: FormData) => Promise<any>;
   deleteMedia: (id: string) => Promise<any>;
+
+  // Suppliers
+  getAllSuppliers: () => Promise<any>;
+  getPopularSuppliers: () => Promise<any>;
+  getTrendingSuppliers: () => Promise<any>;
+  createSupplier: (formData: FormData) => Promise<any>;
+  updateSupplier: (id: string, formData: FormData) => Promise<any>;
+  deleteSupplier: (id: string) => Promise<any>;
 }
 
 interface ApiProviderProps {
@@ -457,6 +465,43 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
     ).data;
   };
 
+  // Suppliers
+  const getAllSuppliers = async () => {
+    return (await axios.get(`${BASE_URL}/api/suppliers/all`)).data;
+  };
+
+  const getPopularSuppliers = async () => {
+    return (await axios.get(`${BASE_URL}/api/suppliers/popular`)).data;
+  };
+
+  const getTrendingSuppliers = async () => {
+    return (await axios.get(`${BASE_URL}/api/suppliers/trending`)).data;
+  };
+
+  const createSupplier = async (formData: FormData) => {
+    return (
+      await axios.post(`${BASE_URL}/api/suppliers/create`, formData, {
+        withCredentials: true,
+      })
+    ).data;
+  };
+
+  const updateSupplier = async (id: string, formData: FormData) => {
+    return (
+      await axios.put(`${BASE_URL}/api/suppliers/update/${id}`, formData, {
+        withCredentials: true,
+      })
+    ).data;
+  };
+
+  const deleteSupplier = async (id: string) => {
+    return (
+      await axios.delete(`${BASE_URL}/api/suppliers/delete/${id}`, {
+        withCredentials: true,
+      })
+    ).data;
+  };
+
   const getUserProfile = async () => {
     try {
       setIsLoadingProfile(true);
@@ -527,6 +572,12 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
         getMedia,
         createMedia,
         deleteMedia,
+        getAllSuppliers,
+        getPopularSuppliers,
+        getTrendingSuppliers,
+        createSupplier,
+        updateSupplier,
+        deleteSupplier,
       }}
     >
       {children}
