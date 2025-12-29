@@ -74,10 +74,10 @@ const PaymentPage: React.FC = () => {
 
         const payRes = await pay(paymentData);
 
-        if (payRes.status === "success" && payRes.data?.checkout_url) {
-          window.location.href = payRes.data.checkout_url;
+        if (payRes.success) {
+          navigate("/ticket-success");
         } else {
-          throw new Error("Payment initialization failed");
+          throw new Error("Payment failed");
         }
       }
     } catch (err: any) {
