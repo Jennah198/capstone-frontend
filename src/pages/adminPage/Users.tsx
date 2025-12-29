@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
-import { 
-  FaUsers, 
-  FaUser, 
-  FaUserTie, 
-  FaUserShield, 
-  FaSpinner, 
-  FaEdit, 
+import {
+  FaUsers,
+  FaUser,
+  FaUserTie,
+  FaUserShield,
+  FaSpinner,
+  FaEdit,
   FaSearch,
   FaFilter,
   FaEye,
@@ -46,10 +46,10 @@ const AdminUsers: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}/api/users/get-users`, { 
-        withCredentials: true 
+      const response = await axios.get(`${BASE_URL}/api/auth/get-users`, {
+        withCredentials: true
       });
-      
+
       if (response.data.success) {
         setUsers(response.data.users || []);
       }
@@ -65,13 +65,13 @@ const AdminUsers: React.FC = () => {
     setUpdatingRole(userId);
     try {
       const response = await axios.put(
-        `${BASE_URL}/api/users/change-role/${userId}`,
+        `${BASE_URL}/api/auth/change-role/${userId}`,
         { role: newRole },
         { withCredentials: true }
       );
-      
+
       if (response.data.success) {
-        setUsers(users.map(user => 
+        setUsers(users.map(user =>
           user._id === userId ? { ...user, role: newRole } : user
         ));
         toastSuccess(`Role changed to ${newRole}`);
@@ -94,12 +94,12 @@ const AdminUsers: React.FC = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    
+
     return matchesSearch && matchesRole;
   });
 
@@ -108,7 +108,7 @@ const AdminUsers: React.FC = () => {
     const adminCount = users.filter(u => u.role === 'admin').length;
     const organizerCount = users.filter(u => u.role === 'organizer').length;
     const userCount = users.filter(u => u.role === 'user').length;
-    
+
     return { totalUsers, adminCount, organizerCount, userCount };
   };
 
@@ -259,7 +259,7 @@ const AdminUsers: React.FC = () => {
                   {filteredUsers.map((user) => {
                     const roleBadge = getRoleBadge(user.role);
                     const RoleIcon = roleBadge.icon;
-                    
+
                     return (
                       <tr key={user._id} className="hover:bg-gray-50 transition">
                         {/* User Info */}
@@ -332,7 +332,7 @@ const AdminUsers: React.FC = () => {
               {filteredUsers.map((user) => {
                 const roleBadge = getRoleBadge(user.role);
                 const RoleIcon = roleBadge.icon;
-                
+
                 return (
                   <div key={user._id} className="p-4 hover:bg-gray-50">
                     <div className="flex justify-between items-start mb-3">

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { FaTag, FaSpinner, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-import { useEventContext } from '../../context/EventContext';
+import React, { useState, useEffect } from "react";
+import { FaTag, FaSpinner, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { useEventContext } from "../../context/EventContext";
 
 interface Category {
   _id: string;
@@ -12,7 +12,7 @@ interface Category {
 }
 
 const CategoryList: React.FC = () => {
-  const { BASE_URL, getCategories, deleteCategory } = useEventContext();
+  const { BASE_URL, getCategories, deleteCategory, user } = useEventContext();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -27,7 +27,7 @@ const CategoryList: React.FC = () => {
           setCategories(res.categories || []);
         }
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       } finally {
         setLoading(false);
       }
@@ -38,7 +38,7 @@ const CategoryList: React.FC = () => {
 
   // Handle delete category
   const handleDelete = async (categoryId: string) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) {
+    if (!window.confirm("Are you sure you want to delete this category?")) {
       return;
     }
 
@@ -46,11 +46,13 @@ const CategoryList: React.FC = () => {
     try {
       const res = await deleteCategory(categoryId);
       if (res.success) {
-        setCategories(categories.filter(category => category._id !== categoryId));
+        setCategories(
+          categories.filter((category) => category._id !== categoryId)
+        );
       }
     } catch (error) {
-      console.error('Error deleting category:', error);
-      alert('Failed to delete category');
+      console.error("Error deleting category:", error);
+      alert("Failed to delete category");
     } finally {
       setDeleteLoading(null);
     }
@@ -65,13 +67,15 @@ const CategoryList: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-800">Categories</h1>
             <p className="text-gray-600 mt-2">Manage event categories</p>
           </div>
-          <Link
-            to="/create-category"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2 whitespace-nowrap"
-          >
-            <FaPlus />
-            Add New Category
-          </Link>
+          {user?.role === "admin" && (
+            <Link
+              to="/organizer/create-category"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2 whitespace-nowrap"
+            >
+              <FaPlus />
+              Add New Category
+            </Link>
+          )}
         </div>
 
         {/* Loading State */}
@@ -86,15 +90,21 @@ const CategoryList: React.FC = () => {
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-4">
               <FaTag className="text-gray-400 text-3xl" />
             </div>
-            <h3 className="text-xl font-medium text-gray-800 mb-2">No categories found</h3>
-            <p className="text-gray-600 mb-6">Get started by creating your first category</p>
-            <Link
-              to="/create-category"
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
-            >
-              <FaPlus />
-              Create Category
-            </Link>
+            <h3 className="text-xl font-medium text-gray-800 mb-2">
+              No categories found
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Get started by creating your first category
+            </p>
+            {user?.role === "admin" && (
+              <Link
+                to="/organizer/create-category"
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+              >
+                <FaPlus />
+                Create Category
+              </Link>
+            )}
           </div>
         ) : (
           /* Categories Grid */
@@ -114,7 +124,8 @@ const CategoryList: React.FC = () => {
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.onerror = null;
-                        target.src = 'https://images.unsplash.com/photo-1519677100203-0f46c831d4b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                        target.src =
+                          "https://images.unsplash.com/photo-1519677100203-0f46c831d4b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
                       }}
                     />
                   ) : (
@@ -130,34 +141,41 @@ const CategoryList: React.FC = () => {
                 {/* Category Info */}
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">{category.name}</h3>
+                    <h3 className="text-xl font-bold text-gray-800">
+                      {category.name}
+                    </h3>
                     <div className="flex space-x-2">
-                      <Link
-                        to={`/organizer/edit-category/${category._id}`}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                        title="Edit category"
-                      >
-                        <FaEdit />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(category._id)}
-                        disabled={deleteLoading === category._id}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Delete category"
-                      >
-                        {deleteLoading === category._id ? (
-                          <FaSpinner className="animate-spin" />
-                        ) : (
-                          <FaTrash />
-                        )}
-                      </button>
+                      {user?.role === "admin" && (
+                        <>
+                          <Link
+                            to={`/organizer/edit-category/${category._id}`}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                            title="Edit category"
+                          >
+                            <FaEdit />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(category._id)}
+                            disabled={deleteLoading === category._id}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Delete category"
+                          >
+                            {deleteLoading === category._id ? (
+                              <FaSpinner className="animate-spin" />
+                            ) : (
+                              <FaTrash />
+                            )}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
 
                   {/* Created Date */}
                   <div className="pt-4 border-t border-gray-100">
                     <p className="text-sm text-gray-500">
-                      Created: {new Date(category.createdAt).toLocaleDateString()}
+                      Created:{" "}
+                      {new Date(category.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -169,7 +187,8 @@ const CategoryList: React.FC = () => {
         {/* Footer */}
         {categories.length > 0 && (
           <div className="mt-8 text-center text-gray-600">
-            Total {categories.length} categor{categories.length !== 1 ? 'ies' : 'y'}
+            Total {categories.length} categor
+            {categories.length !== 1 ? "ies" : "y"}
           </div>
         )}
       </div>

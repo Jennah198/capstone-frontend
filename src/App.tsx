@@ -44,6 +44,9 @@ import AdminDashboardStats from './pages/adminPage/AdminDashboardStats';
 import Users from './pages/adminPage/Users';
 import AdminEvents from './pages/adminPage/AdminEvents';
 import AdminOrderListPage from './pages/adminPage/AdminOrderListPage';
+import AdminCategories from './pages/adminPage/AdminCategories';
+import AdminVenues from './pages/adminPage/AdminVenues';
+import AdminMedia from './pages/adminPage/AdminMedia';
 
 import { ApiProvider } from './context/EventContext';
 
@@ -116,6 +119,9 @@ const App: React.FC = () => {
               <Route path="users" element={<Users />} />
               <Route path="events" element={<AdminEvents />} />
               <Route path="admin-orders" element={<AdminOrderListPage />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="venues" element={<AdminVenues />} />
+              <Route path="media" element={<AdminMedia />} />
             </Route>
           </Route>
         </Routes>

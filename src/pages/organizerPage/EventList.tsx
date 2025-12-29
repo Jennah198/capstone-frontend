@@ -1,6 +1,6 @@
 // pages/EventList.tsx
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -12,9 +12,9 @@ import {
   FaSpinner,
   FaPlus,
   FaClock,
-} from 'react-icons/fa';
-import { format, parseISO, isPast, isFuture } from 'date-fns';
-import { useEventContext } from '../../context/EventContext';
+} from "react-icons/fa";
+import { format, parseISO, isPast, isFuture } from "date-fns";
+import { useEventContext } from "../../context/EventContext";
 
 interface Category {
   _id?: string;
@@ -49,14 +49,15 @@ interface Filters {
 }
 
 const EventList: React.FC = () => {
-  const { BASE_URL, getAllEvents, getCategories, deleteEvent } = useEventContext();
+  const { BASE_URL, getAllEvents, getCategories, deleteEvent } =
+    useEventContext();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Filters>({
-    status: 'all',
-    category: '',
-    dateRange: 'all',
+    status: "all",
+    category: "",
+    dateRange: "all",
   });
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -73,7 +74,7 @@ const EventList: React.FC = () => {
         setEvents(res.data || []);
       }
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error("Error fetching events:", error);
     } finally {
       setLoading(false);
     }
@@ -86,7 +87,7 @@ const EventList: React.FC = () => {
         setCategories(res.categories || []);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -105,15 +106,15 @@ const EventList: React.FC = () => {
   };
 
   const clearFilters = () => {
-    setFilters({ status: 'all', category: '', dateRange: 'all' });
-    setSearchTerm('');
+    setFilters({ status: "all", category: "", dateRange: "all" });
+    setSearchTerm("");
   };
 
   const formatDate = (dateString: string): string => {
     try {
-      return format(parseISO(dateString), 'MMM dd, yyyy • hh:mm a');
+      return format(parseISO(dateString), "MMM dd, yyyy • hh:mm a");
     } catch {
-      return 'Invalid date';
+      return "Invalid date";
     }
   };
 
@@ -122,29 +123,29 @@ const EventList: React.FC = () => {
     const startDate = new Date(event.startDate);
     const endDate = event.endDate ? new Date(event.endDate) : null;
 
-    if (!event.isPublished) return 'draft';
+    if (!event.isPublished) return "draft";
     if (isPast(startDate)) {
-      if (endDate && isPast(endDate)) return 'completed';
-      return 'ongoing';
+      if (endDate && isPast(endDate)) return "completed";
+      return "ongoing";
     }
-    if (isFuture(startDate)) return 'upcoming';
-    return 'published';
+    if (isFuture(startDate)) return "upcoming";
+    return "published";
   };
 
   const getStatusColor = (status: string): string => {
     const colors: Record<string, string> = {
-      draft: 'bg-gray-100 text-gray-800',
-      published: 'bg-blue-100 text-blue-800',
-      upcoming: 'bg-green-100 text-green-800',
-      ongoing: 'bg-yellow-100 text-yellow-800',
-      completed: 'bg-purple-100 text-purple-800',
-      cancelled: 'bg-red-100 text-red-800',
+      draft: "bg-gray-100 text-gray-800",
+      published: "bg-blue-100 text-blue-800",
+      upcoming: "bg-green-100 text-green-800",
+      ongoing: "bg-yellow-100 text-yellow-800",
+      completed: "bg-purple-100 text-purple-800",
+      cancelled: "bg-red-100 text-red-800",
     };
     return colors[status] || colors.draft;
   };
 
   const handleDelete = async (eventId: string) => {
-    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    if (!window.confirm("Are you sure you want to delete this event?")) return;
 
     try {
       const res = await deleteEvent(eventId);
@@ -152,8 +153,8 @@ const EventList: React.FC = () => {
         fetchEvents();
       }
     } catch (error) {
-      console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event");
     }
   };
 
@@ -185,7 +186,7 @@ const EventList: React.FC = () => {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch(e)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch(e)}
                   placeholder="Search events by title..."
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
@@ -195,7 +196,7 @@ const EventList: React.FC = () => {
             <div className="flex flex-wrap gap-2">
               <select
                 value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
+                onChange={(e) => handleFilterChange("status", e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
               >
                 <option value="all">All Status</option>
@@ -208,12 +209,15 @@ const EventList: React.FC = () => {
 
               <select
                 value={filters.category}
-                onChange={(e) => handleFilterChange('category', e.target.value)}
+                onChange={(e) => handleFilterChange("category", e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
               >
                 <option value="">All Categories</option>
                 {categories.map((category) => (
-                  <option key={category._id || category.id} value={category._id || category.id}>
+                  <option
+                    key={category._id || category.id}
+                    value={category._id || category.id}
+                  >
                     {category.name}
                   </option>
                 ))}
@@ -221,7 +225,9 @@ const EventList: React.FC = () => {
 
               <select
                 value={filters.dateRange}
-                onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange("dateRange", e.target.value)
+                }
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
               >
                 <option value="all">All Dates</option>
@@ -252,8 +258,12 @@ const EventList: React.FC = () => {
           ) : events.length === 0 ? (
             <div className="text-center py-20">
               <FaCalendarAlt className="text-gray-300 text-6xl mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-gray-800 mb-2">No events found</h3>
-              <p className="text-gray-600 mb-6">Get started by creating your first event</p>
+              <h3 className="text-xl font-medium text-gray-800 mb-2">
+                No events found
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Get started by creating your first event
+              </p>
               <Link
                 to="/organizer/create-event"
                 className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
@@ -269,36 +279,60 @@ const EventList: React.FC = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">Event</th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">Category</th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">Venue</th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">Pricing</th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">Status</th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">Actions</th>
+                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                        Event
+                      </th>
+                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                        Category
+                      </th>
+                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                        Venue
+                      </th>
+                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                        Pricing
+                      </th>
+                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                        Status
+                      </th>
+                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {events.map((event) => {
                       const status = getEventStatus(event);
                       return (
-                        <tr key={event.id} className="hover:bg-gray-50 transition">
+                        <tr
+                          key={event.id}
+                          className="hover:bg-gray-50 transition"
+                        >
                           <td className="py-4 px-6">
                             <div className="flex items-start gap-4">
                               {event.image && (
                                 <img
-                                  src={`${BASE_URL}/uploads/${event.image}`}
+                                  src={
+                                    event.image.startsWith("http")
+                                      ? event.image
+                                      : `${BASE_URL}/uploads/${event.image}`
+                                  }
                                   alt={event.title}
                                   className="w-16 h-16 object-cover rounded-lg"
-                                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                  onError={(
+                                    e: React.SyntheticEvent<HTMLImageElement>
+                                  ) => {
                                     e.currentTarget.onerror = null;
-                                    e.currentTarget.src = 'https://via.placeholder.com/150';
+                                    e.currentTarget.src =
+                                      "https://picsum.photos/150";
                                   }}
                                 />
                               )}
                               <div>
-                                <h4 className="font-medium text-gray-800 mb-1">{event.title}</h4>
+                                <h4 className="font-medium text-gray-800 mb-1">
+                                  {event.title}
+                                </h4>
                                 <p className="text-sm text-gray-600">
-                                  {event.category?.name || 'No category'}
+                                  {event.category?.name || "No category"}
                                 </p>
                               </div>
                             </div>
@@ -307,23 +341,33 @@ const EventList: React.FC = () => {
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-2">
                               <FaTag className="text-gray-400" />
-                              <span className="text-sm">{event.category?.name || '—'}</span>
+                              <span className="text-sm">
+                                {event.category?.name || "—"}
+                              </span>
                             </div>
                           </td>
 
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-2">
                               <FaMapMarkerAlt className="text-gray-400" />
-                              <span className="text-sm">{event.venue?.name || '—'}</span>
+                              <span className="text-sm">
+                                {event.venue?.name || "—"}
+                              </span>
                             </div>
                           </td>
 
                           <td className="py-4 px-6">
                             <div className="space-y-1">
-                              {event.normalPrice && event.normalPrice.price > 0 ? (
-                                <span className="text-sm">${event.normalPrice.price}</span>
-                              ) : event.normalPrice && event.normalPrice.price === 0 ? (
-                                <span className="text-sm text-green-600">Free</span>
+                              {event.normalPrice &&
+                              event.normalPrice.price > 0 ? (
+                                <span className="text-sm">
+                                  ${event.normalPrice.price}
+                                </span>
+                              ) : event.normalPrice &&
+                                event.normalPrice.price === 0 ? (
+                                <span className="text-sm text-green-600">
+                                  Free
+                                </span>
                               ) : (
                                 <span className="text-sm text-gray-400">—</span>
                               )}
@@ -380,11 +424,13 @@ const EventList: React.FC = () => {
                     <div key={event.id} className="p-4 hover:bg-gray-50">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h4 className="font-medium text-gray-800 mb-1">{event.title}</h4>
+                          <h4 className="font-medium text-gray-800 mb-1">
+                            {event.title}
+                          </h4>
                           <div className="flex items-center gap-2 mb-2">
                             <FaTag className="text-gray-400 text-xs" />
                             <span className="text-xs text-gray-600">
-                              {event.category?.name || 'No category'}
+                              {event.category?.name || "No category"}
                             </span>
                           </div>
                           <span
@@ -396,10 +442,16 @@ const EventList: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Link to={`/organizer/edit-event/${event.id}`} className="p-1 text-green-600">
+                          <Link
+                            to={`/organizer/edit-event/${event.id}`}
+                            className="p-1 text-green-600"
+                          >
                             <FaEdit />
                           </Link>
-                          <button onClick={() => handleDelete(event.id)} className="p-1 text-red-600">
+                          <button
+                            onClick={() => handleDelete(event.id)}
+                            className="p-1 text-red-600"
+                          >
                             <FaTrash />
                           </button>
                         </div>
@@ -408,21 +460,30 @@ const EventList: React.FC = () => {
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div className="flex items-center gap-2 text-gray-600">
                           <FaClock />
-                          <span className="text-xs">{formatDate(event.startDate)}</span>
+                          <span className="text-xs">
+                            {formatDate(event.startDate)}
+                          </span>
                         </div>
 
                         <div className="flex items-center gap-2 text-gray-600">
                           <FaMapMarkerAlt />
-                          <span className="text-xs">{event.venue?.name || 'No venue'}</span>
+                          <span className="text-xs">
+                            {event.venue?.name || "No venue"}
+                          </span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           {event.normalPrice && event.normalPrice.price > 0 ? (
-                            <span className="text-xs">${event.normalPrice.price}</span>
-                          ) : event.normalPrice && event.normalPrice.price === 0 ? (
+                            <span className="text-xs">
+                              ${event.normalPrice.price}
+                            </span>
+                          ) : event.normalPrice &&
+                            event.normalPrice.price === 0 ? (
                             <span className="text-xs text-green-600">Free</span>
                           ) : (
-                            <span className="text-xs text-gray-400">No price</span>
+                            <span className="text-xs text-gray-400">
+                              No price
+                            </span>
                           )}
                         </div>
 

@@ -10,6 +10,7 @@ interface FormData {
   phone: string;
   password: string;
   secretKey: string;
+  role: string;
 }
 
 const RegisterPage: React.FC = () => {
@@ -20,10 +21,10 @@ const RegisterPage: React.FC = () => {
     phone: "",
     password: "",
     secretKey: "",
+    role: "user",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [type, setType] = useState<"user" | "admin">("user");
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,6 +43,12 @@ const RegisterPage: React.FC = () => {
       setLoading(false);
       return;
     }
+
+    if (form.role === "admin" && !form.secretKey) {
+      setMessage("Secret key is required for admin registration");
+      setLoading(false);
+      return;
+    }
     if (!emailRegex.test(form.email)) {
       setMessage("Invalid email address");
       setLoading(false);
@@ -53,33 +60,69 @@ const RegisterPage: React.FC = () => {
 
       if (data) {
         toastSuccess(data.message || "Registration successful!");
-        navigate('/login');
+        navigate("/login");
       }
     } catch (err: any) {
-      setMessage(err.response?.data?.message || "Server error. Try again later.");
+      setMessage(
+        err.response?.data?.message || "Server error. Try again later."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const resetType = () => {
-    setForm((prev) => ({ ...prev, secretKey: "" }));
+    setForm((prev) => ({ ...prev, secretKey: "", role: "user" }));
     setMessage(null);
-    setType("user");
+  };
+
+  const setRole = (role: string) => {
+    setForm((prev) => ({
+      ...prev,
+      role,
+      secretKey: role === "user" || role === "organizer" ? "" : prev.secretKey,
+    }));
+    setMessage(null);
   };
 
   return (
     <div className="pt-10 pb-10 w-full">
       <div className="w-full flex flex-col items-center justify-center">
-        <form onSubmit={handleSubmit} className="md:w-96 w-80 flex flex-col items-center justify-center">
+        <form
+          onSubmit={handleSubmit}
+          className="md:w-96 w-80 flex flex-col items-center justify-center"
+        >
           <h2 className="text-4xl text-gray-900 font-medium">Create Account</h2>
-          <p className="text-sm text-gray-500/90 mt-3">Join us by creating your account</p>
+          <p className="text-sm text-gray-500/90 mt-3">
+            Join us by creating your account
+          </p>
 
-          <div className="flex items-center gap-5 mb-8 mt-4">
-            <button type="button" onClick={resetType} className={`px-4 py-2 rounded-3xl border ${type === "user" ? 'bg-indigo-100' : ''} border-gray-100`}>
+          <div className="flex items-center gap-3 mb-8 mt-4">
+            <button
+              type="button"
+              onClick={() => setRole("user")}
+              className={`px-3 py-2 rounded-3xl border ${
+                form.role === "user" ? "bg-indigo-100" : ""
+              } border-gray-100 text-sm`}
+            >
               Register as User
             </button>
-            <button type="button" onClick={() => setType("admin")} className={`px-4 py-2 rounded-3xl border ${type === "admin" ? 'bg-indigo-100' : ''} border-gray-100`}>
+            <button
+              type="button"
+              onClick={() => setRole("organizer")}
+              className={`px-3 py-2 rounded-3xl border ${
+                form.role === "organizer" ? "bg-indigo-100" : ""
+              } border-gray-100 text-sm`}
+            >
+              Register as Organizer
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole("admin")}
+              className={`px-3 py-2 rounded-3xl border ${
+                form.role === "admin" ? "bg-indigo-100" : ""
+              } border-gray-100 text-sm`}
+            >
               Register as Admin
             </button>
           </div>
@@ -142,7 +185,7 @@ const RegisterPage: React.FC = () => {
             />
           </div>
 
-          {type === "admin" && (
+          {form.role === "admin" && (
             <div className="flex items-center w-full bg-transparent border border-gray-300/60 h-12 rounded-full overflow-hidden pl-6 gap-2 mb-6">
               <svg width="13" height="17" viewBox="0 0 13 17" fill="#6B7280">
                 <path d="M13 8.5c0-.938-.729-1.7-1.625-1.7h-.812V4.25C10.563 1.907 8.74 0 6.5 0S2.438 1.907 2.438 4.25V6.8h-.813C.729 6.8 0 7.562 0 8.5v6.8c0 .938.729 1.7 1.625 1.7h9.75c.896 0 1.625-.762 1.625-1.7zM4.063 4.25c0-1.406 1.093-2.55 2.437-2.55s2.438 1.144 2.438 2.55V6.8H4.061z" />
@@ -152,7 +195,7 @@ const RegisterPage: React.FC = () => {
                 name="secretKey"
                 value={form.secretKey}
                 onChange={handleChange}
-                placeholder="Secret key for admin only"
+                placeholder="Secret key for admin registration"
                 className="bg-transparent outline-none text-sm w-full text-gray-700"
               />
             </div>
@@ -161,13 +204,18 @@ const RegisterPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`mt-2 w-full h-11 rounded-full text-white bg-indigo-500 hover:opacity-90 transition-opacity ${loading ? "cursor-not-allowed opacity-70" : ""}`}
+            className={`mt-2 w-full h-11 rounded-full text-white bg-indigo-500 hover:opacity-90 transition-opacity ${
+              loading ? "cursor-not-allowed opacity-70" : ""
+            }`}
           >
             {loading ? "Registering..." : "Create Account"}
           </button>
 
           <p className="text-gray-500/90 text-sm mt-4">
-            Already have an account? <Link to="/login" className="text-indigo-400 hover:underline">Sign in</Link>
+            Already have an account?{" "}
+            <Link to="/login" className="text-indigo-400 hover:underline">
+              Sign in
+            </Link>
           </p>
         </form>
       </div>

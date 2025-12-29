@@ -20,7 +20,7 @@ const UserLogin: React.FC = () => {
 
     try {
       setLoading(true);
-      const data = await login({ email, password });
+      const data = await login({ email: email.toLowerCase().trim(), password });
 
       if (data.user) {
         const role = data.user.role;

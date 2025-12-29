@@ -1,26 +1,39 @@
-import React, { useState, type ChangeEvent, type FormEvent } from 'react';
-import { FaPlus, FaSpinner, FaUpload } from 'react-icons/fa';
-import { useEventContext } from '../../context/EventContext';
-import { toastSuccess } from '../../../utility/toast';
+import React, {
+  useState,
+  useEffect,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
+import { FaPlus, FaSpinner, FaUpload } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useEventContext } from "../../context/EventContext";
+import { toastSuccess } from "../../../utility/toast";
 
 interface FormData {
   name: string;
 }
 
 const CreateCategory: React.FC = () => {
-  const { createCategory } = useEventContext();
+  const { createCategory, user } = useEventContext();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
-    name: '',
+    name: "",
   });
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>("");
+
+  useEffect(() => {
+    if (user && user.role !== "admin") {
+      navigate("/organizer");
+    }
+  }, [user, navigate]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -47,24 +60,26 @@ const CreateCategory: React.FC = () => {
     setLoading(true);
     try {
       const data = new FormData();
-      data.append('name', formData.name);
+      data.append("name", formData.name);
       if (image) {
-        data.append('image', image);
+        data.append("image", image);
       }
 
       const res = await createCategory(data);
 
       if (res.success) {
-        setFormData({ name: '' });
+        setFormData({ name: "" });
         setImage(null);
-        setImagePreview('');
+        setImagePreview("");
         toastSuccess(res.message);
       } else {
         setMessage(res.message || "Failed to create category");
       }
     } catch (err: any) {
       console.error(err);
-      setMessage(err.response?.data?.message || "Server error. Please try again.");
+      setMessage(
+        err.response?.data?.message || "Server error. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -74,14 +89,16 @@ const CreateCategory: React.FC = () => {
     <div className="ml-60 p-8 pt-20">
       {/* Message Alert */}
       {message && (
-        <div className='mb-6 p-4 rounded-lg bg-red-100 text-red-700 border border-red-200'>
+        <div className="mb-6 p-4 rounded-lg bg-red-100 text-red-700 border border-red-200">
           {message}
         </div>
       )}
 
       <div className="max-w-2xl">
         <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Create New Category</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            Create New Category
+          </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -123,9 +140,12 @@ const CreateCategory: React.FC = () => {
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <FaUpload className="w-8 h-8 text-gray-400 mb-2" />
                     <p className="mb-2 text-sm text-gray-500">
-                      <span className="font-semibold">Click to upload</span> or drag and drop
+                      <span className="font-semibold">Click to upload</span> or
+                      drag and drop
                     </p>
-                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                    <p className="text-xs text-gray-500">
+                      PNG, JPG, GIF up to 5MB
+                    </p>
                   </div>
                   <input
                     type="file"

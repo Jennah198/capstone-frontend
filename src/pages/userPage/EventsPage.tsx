@@ -142,8 +142,10 @@ const EventsPage: React.FC = () => {
                       <img
                         src={
                           event.image
-                            ? `${BASE_URL}/uploads/${event.image}`
-                            : "https://via.placeholder.com/300"
+                            ? event.image.startsWith("http")
+                              ? event.image
+                              : `${BASE_URL}/uploads/${event.image}`
+                            : "https://picsum.photos/300/200"
                         }
                         alt={event.title}
                         className="w-full h-48 object-cover group-hover:scale-105 transition"
@@ -195,8 +197,10 @@ const EventsPage: React.FC = () => {
                     <img
                       src={
                         event.image
-                          ? `${BASE_URL}/uploads/${event.image}`
-                          : "https://via.placeholder.com/300"
+                          ? event.image.startsWith("http")
+                            ? event.image
+                            : `${BASE_URL}/uploads/${event.image}`
+                          : "https://picsum.photos/300/200"
                       }
                       alt={event.title}
                       className="w-full h-40 object-cover rounded-t-2xl group-hover:scale-105 transition"
@@ -226,10 +230,11 @@ const EventsPage: React.FC = () => {
             {[1, 2, 3].map((page) => (
               <button
                 key={page}
-                className={`w-10 h-10 rounded-full font-medium transition ${page === 1
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-200 hover:bg-gray-300"
-                  }`}
+                className={`w-10 h-10 rounded-full font-medium transition ${
+                  page === 1
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-200 hover:bg-gray-300"
+                }`}
               >
                 {page}
               </button>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios, { AxiosError } from 'axios';
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import axios, { AxiosError } from "axios";
 import {
   FaArrowLeft,
   FaSpinner,
@@ -12,10 +12,10 @@ import {
   FaDollarSign,
   FaCrown,
   FaTimes,
-  FaUpload
-} from 'react-icons/fa';
-import { useEventContext } from '../../context/EventContext';
-import { toastSuccess } from '../../../utility/toast';
+  FaUpload,
+} from "react-icons/fa";
+import { useEventContext } from "../../context/EventContext";
+import { toastSuccess } from "../../../utility/toast";
 
 interface Category {
   _id: string;
@@ -48,7 +48,7 @@ interface FormData {
 }
 
 interface Message {
-  type: 'success' | 'error' | '';
+  type: "success" | "error" | "";
   text: string;
 }
 
@@ -76,91 +76,105 @@ const EditEvent: React.FC = () => {
   // States
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
-  const [message, setMessage] = useState<Message>({ type: '', text: '' });
+  const [message, setMessage] = useState<Message>({ type: "", text: "" });
   const [categories, setCategories] = useState<Category[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
 
   // Form states
   const [formData, setFormData] = useState<FormData>({
-    title: '',
-    description: '',
-    category: '',
-    venue: '',
-    startDate: '',
-    endDate: '',
+    title: "",
+    description: "",
+    category: "",
+    venue: "",
+    startDate: "",
+    endDate: "",
     normalPrice: {
-      price: '',
-      quantity: ''
+      price: "",
+      quantity: "",
     },
     vipPrice: {
-      price: '',
-      quantity: ''
+      price: "",
+      quantity: "",
     },
-    isPublished: false
+    isPublished: false,
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const [currentImage, setCurrentImage] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [currentImage, setCurrentImage] = useState<string>("");
 
   // Fetch event data and dropdowns
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       try {
         // Fetch event details
-        const res = await axios.get<EventResponse>(`${BASE_URL}/api/events/get-eventById/${id}`, { withCredentials: true });
+        const res = await axios.get<EventResponse>(
+          `${BASE_URL}/api/events/get-eventById/${id}`,
+          { withCredentials: true }
+        );
 
         if (res.data.success && res.data.event) {
           const event = res.data.event;
 
           const formatForInput = (dateString: string) => {
-            if (!dateString) return '';
+            if (!dateString) return "";
             const date = new Date(dateString);
             return date.toISOString().slice(0, 16);
           };
 
           setFormData({
-            title: event.title || '',
-            description: event.description || '',
-            category: event.category?._id || '',
-            venue: event.venue?._id || '',
+            title: event.title || "",
+            description: event.description || "",
+            category: event.category?._id || "",
+            venue: event.venue?._id || "",
             startDate: formatForInput(event.startDate),
-            endDate: formatForInput(event.endDate || ''),
+            endDate: formatForInput(event.endDate || ""),
             normalPrice: {
-              price: event.normalPrice?.price?.toString() || '',
-              quantity: event.normalPrice?.quantity?.toString() || ''
+              price: event.normalPrice?.price?.toString() || "",
+              quantity: event.normalPrice?.quantity?.toString() || "",
             },
             vipPrice: {
-              price: event.vipPrice?.price?.toString() || '',
-              quantity: event.vipPrice?.quantity?.toString() || ''
+              price: event.vipPrice?.price?.toString() || "",
+              quantity: event.vipPrice?.quantity?.toString() || "",
             },
-            isPublished: event.isPublished || false
+            isPublished: event.isPublished || false,
           });
 
           // Set current image
           if (event.image) {
-            setCurrentImage(`${BASE_URL}/uploads/${event.image}`);
+            setCurrentImage(
+              event.image.startsWith("http")
+                ? event.image
+                : `${BASE_URL}/uploads/${event.image}`
+            );
           }
         }
 
         // Fetch categories
-        const categoriesResponse = await axios.get<{ success: boolean; data?: Category[] }>(`${BASE_URL}/api/categories/get-category`, { withCredentials: true });
+        const categoriesResponse = await axios.get<{
+          success: boolean;
+          data?: Category[];
+        }>(`${BASE_URL}/api/categories/get-category`, {
+          withCredentials: true,
+        });
         if (categoriesResponse.data.success) {
           setCategories(categoriesResponse.data.data || []);
         }
 
         // Fetch venues
-        const venuesResponse = await axios.get<{ success: boolean; data?: Venue[] }>(`${BASE_URL}/api/venues/get-venue`, { withCredentials: true });
+        const venuesResponse = await axios.get<{
+          success: boolean;
+          data?: Venue[];
+        }>(`${BASE_URL}/api/venues/get-venue`, { withCredentials: true });
         if (venuesResponse.data.success) {
           setVenues(venuesResponse.data.data || []);
         }
-
       } catch (error) {
-        console.log('Error fetching data:', error);
-        setMessage({ type: 'error', text: 'Failed to load event data' });
+        console.log("Error fetching data:", error);
+        setMessage({ type: "error", text: "Failed to load event data" });
       } finally {
         setLoading(false);
       }
@@ -169,28 +183,39 @@ const EditEvent: React.FC = () => {
     fetchData();
   }, [id, BASE_URL]);
 
-  const showMessage = (type: 'success' | 'error', text: string, duration = 3000) => {
+  const showMessage = (
+    type: "success" | "error",
+    text: string,
+    duration = 3000
+  ) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage({ type: '', text: '' }), duration);
+    setTimeout(() => setMessage({ type: "", text: "" }), duration);
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
 
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev] as PriceData,
-          [child]: type === 'number' ? (value === '' ? '' : parseFloat(value).toString()) : value
-        }
+          ...(prev[parent as keyof typeof prev] as PriceData),
+          [child]:
+            type === "number"
+              ? value === ""
+                ? ""
+                : parseFloat(value).toString()
+              : value,
+        },
       }));
     } else {
       const input = e.target as HTMLInputElement;
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: input.type === 'checkbox' ? input.checked : value
+        [name]: input.type === "checkbox" ? input.checked : value,
       }));
     }
   };
@@ -211,53 +236,59 @@ const EditEvent: React.FC = () => {
 
   const removeImage = () => {
     setImageFile(null);
-    setImagePreview('');
-    setCurrentImage('');
+    setImagePreview("");
+    setCurrentImage("");
   };
 
   const validateForm = () => {
     if (!formData.title.trim()) {
-      showMessage('error', 'Event title is required');
+      showMessage("error", "Event title is required");
       return false;
     }
     if (!formData.category.trim()) {
-      showMessage('error', 'Category is required');
+      showMessage("error", "Category is required");
       return false;
     }
 
     if (!formData.startDate) {
-      showMessage('error', 'Start date is required');
+      showMessage("error", "Start date is required");
       return false;
     }
 
-    if (formData.endDate && new Date(formData.endDate) < new Date(formData.startDate)) {
-      showMessage('error', 'End date cannot be before start date');
+    if (
+      formData.endDate &&
+      new Date(formData.endDate) < new Date(formData.startDate)
+    ) {
+      showMessage("error", "End date cannot be before start date");
       return false;
     }
 
     if (!formData.normalPrice.price) {
-      showMessage('error', 'Normal price is required');
+      showMessage("error", "Normal price is required");
       return false;
     }
     if (!formData.normalPrice.quantity) {
-      showMessage('error', 'Quantity is required for Normal Ticket');
+      showMessage("error", "Quantity is required for Normal Ticket");
       return false;
     }
     if (!formData.vipPrice.price) {
-      showMessage('error', 'VIP price is required');
+      showMessage("error", "VIP price is required");
       return false;
     }
     if (!formData.vipPrice.quantity) {
-      showMessage('error', 'Quantity is required for VIP Ticket');
+      showMessage("error", "Quantity is required for VIP Ticket");
       return false;
     }
-    if (formData.normalPrice.price && parseFloat(formData.normalPrice.price) < 0) {
-      showMessage('error', 'Normal price cannot be negative');
+    if (
+      formData.normalPrice.price &&
+      parseFloat(formData.normalPrice.price) < 0
+    ) {
+      showMessage("error", "Normal price cannot be negative");
       return false;
     }
 
     if (formData.vipPrice.price && parseFloat(formData.vipPrice.price) < 0) {
-      showMessage('error', 'VIP price cannot be negative');
+      showMessage("error", "VIP price cannot be negative");
       return false;
     }
 
@@ -277,68 +308,82 @@ const EditEvent: React.FC = () => {
     try {
       const formDataToSend = new FormData();
 
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append("title", formData.title);
+      formDataToSend.append("description", formData.description || "");
 
       if (formData.category) {
-        formDataToSend.append('category', formData.category);
+        formDataToSend.append("category", formData.category);
       }
 
       if (formData.venue) {
-        formDataToSend.append('venue', formData.venue);
+        formDataToSend.append("venue", formData.venue);
       }
 
-      formDataToSend.append('startDate', new Date(formData.startDate).toISOString());
+      formDataToSend.append(
+        "startDate",
+        new Date(formData.startDate).toISOString()
+      );
 
       if (formData.endDate) {
-        formDataToSend.append('endDate', new Date(formData.endDate).toISOString());
+        formDataToSend.append(
+          "endDate",
+          new Date(formData.endDate).toISOString()
+        );
       }
 
-      if (formData.normalPrice.price || formData.normalPrice.price === '0') {
+      if (formData.normalPrice.price || formData.normalPrice.price === "0") {
         const normalPriceData: { price: number; quantity?: number } = {
-          price: parseFloat(formData.normalPrice.price) || 0
+          price: parseFloat(formData.normalPrice.price) || 0,
         };
-        if (formData.normalPrice.quantity || formData.normalPrice.quantity === '0') {
-          normalPriceData.quantity = parseInt(formData.normalPrice.quantity) || 0;
+        if (
+          formData.normalPrice.quantity ||
+          formData.normalPrice.quantity === "0"
+        ) {
+          normalPriceData.quantity =
+            parseInt(formData.normalPrice.quantity) || 0;
         }
-        formDataToSend.append('normalPrice', JSON.stringify(normalPriceData));
+        formDataToSend.append("normalPrice", JSON.stringify(normalPriceData));
       }
 
-      if (formData.vipPrice.price || formData.vipPrice.price === '0') {
+      if (formData.vipPrice.price || formData.vipPrice.price === "0") {
         const vipPriceData: { price: number; quantity?: number } = {
-          price: parseFloat(formData.vipPrice.price) || 0
+          price: parseFloat(formData.vipPrice.price) || 0,
         };
-        if (formData.vipPrice.quantity || formData.vipPrice.quantity === '0') {
+        if (formData.vipPrice.quantity || formData.vipPrice.quantity === "0") {
           vipPriceData.quantity = parseInt(formData.vipPrice.quantity) || 0;
         }
-        formDataToSend.append('vipPrice', JSON.stringify(vipPriceData));
+        formDataToSend.append("vipPrice", JSON.stringify(vipPriceData));
       }
 
-      formDataToSend.append('isPublished', formData.isPublished.toString());
+      formDataToSend.append("isPublished", formData.isPublished.toString());
 
       if (imageFile) {
-        formDataToSend.append('image', imageFile);
+        formDataToSend.append("image", imageFile);
       }
 
-      const response = await axios.put(`${BASE_URL}/api/events/update-event/${id}`, formDataToSend, { withCredentials: true });
+      const response = await axios.put(
+        `${BASE_URL}/api/events/update-event/${id}`,
+        formDataToSend,
+        { withCredentials: true }
+      );
 
       if (response.data.success) {
         toastSuccess(response.data.message);
         navigate(`/organizer/event-detail/${id}`);
       } else {
-        showMessage('error', response.data.message || 'Failed to update event');
+        showMessage("error", response.data.message || "Failed to update event");
       }
     } catch (error) {
-      console.error('Event update error:', error);
+      console.error("Event update error:", error);
       const axiosError = error as AxiosError;
 
       if (axiosError.response) {
         const serverError = axiosError.response.data as { message?: string };
-        showMessage('error', serverError.message || 'Server error occurred');
+        showMessage("error", serverError.message || "Server error occurred");
       } else if (axiosError.request) {
-        showMessage('error', 'Network error. Please check your connection.');
+        showMessage("error", "Network error. Please check your connection.");
       } else {
-        showMessage('error', 'An unexpected error occurred');
+        showMessage("error", "An unexpected error occurred");
       }
     } finally {
       setSaving(false);
@@ -349,7 +394,9 @@ const EditEvent: React.FC = () => {
     return (
       <div className="ml-64 p-8 flex justify-center items-center min-h-screen">
         <FaSpinner className="animate-spin text-blue-600 text-4xl" />
-        <span className="ml-4 text-gray-600 text-lg">Loading event data...</span>
+        <span className="ml-4 text-gray-600 text-lg">
+          Loading event data...
+        </span>
       </div>
     );
   }
@@ -358,16 +405,19 @@ const EditEvent: React.FC = () => {
     <div className="ml-64 p-8">
       {/* Message Alert */}
       {message.text && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-md transform transition-transform duration-300 ${message.type === 'success'
-          ? 'bg-green-100 text-green-800 border border-green-300'
-          : message.type === 'error'
-            ? 'bg-red-100 text-red-800 border border-red-300'
-            : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
-          }`}>
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-md transform transition-transform duration-300 ${
+            message.type === "success"
+              ? "bg-green-100 text-green-800 border border-green-300"
+              : message.type === "error"
+              ? "bg-red-100 text-red-800 border border-red-300"
+              : "bg-yellow-100 text-yellow-800 border border-yellow-300"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <span>{message.text}</span>
             <button
-              onClick={() => setMessage({ type: '', text: '' })}
+              onClick={() => setMessage({ type: "", text: "" })}
               className="ml-4 text-gray-500 hover:text-gray-700"
             >
               <FaTimes />
@@ -433,7 +483,9 @@ const EditEvent: React.FC = () => {
 
           {/* Event Details */}
           <div className="bg-white rounded-xl shadow border border-gray-200 p-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6">Event Details</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-6">
+              Event Details
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Category */}
@@ -449,8 +501,11 @@ const EditEvent: React.FC = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
                 >
                   <option value="">Select a category</option>
-                  {categories.map(category => (
-                    <option key={category._id || category.id} value={category._id || category.id}>
+                  {categories.map((category) => (
+                    <option
+                      key={category._id || category.id}
+                      value={category._id || category.id}
+                    >
                       {category.name}
                     </option>
                   ))}
@@ -470,8 +525,11 @@ const EditEvent: React.FC = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
                 >
                   <option value="">Select a venue</option>
-                  {venues.map(venue => (
-                    <option key={venue._id || venue.id} value={venue._id || venue.id}>
+                  {venues.map((venue) => (
+                    <option
+                      key={venue._id || venue.id}
+                      value={venue._id || venue.id}
+                    >
                       {venue.name} - {venue.city}
                     </option>
                   ))}
@@ -511,7 +569,9 @@ const EditEvent: React.FC = () => {
 
           {/* Pricing */}
           <div className="bg-white rounded-xl shadow border border-gray-200 p-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6">Pricing & Tickets</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-6">
+              Pricing & Tickets
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Normal Ticket */}
@@ -520,7 +580,9 @@ const EditEvent: React.FC = () => {
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <FaDollarSign className="text-blue-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Normal Tickets</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Normal Tickets
+                  </h3>
                 </div>
 
                 <div className="space-y-4">
@@ -529,7 +591,9 @@ const EditEvent: React.FC = () => {
                       Price ($)
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                        $
+                      </span>
                       <input
                         type="number"
                         name="normalPrice.price"
@@ -556,7 +620,9 @@ const EditEvent: React.FC = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
                       placeholder="Unlimited if empty"
                     />
-                    <p className="text-xs text-gray-500 mt-2">Leave empty for unlimited tickets</p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Leave empty for unlimited tickets
+                    </p>
                   </div>
                 </div>
               </div>
@@ -567,7 +633,9 @@ const EditEvent: React.FC = () => {
                   <div className="p-2 bg-purple-100 rounded-lg">
                     <FaCrown className="text-purple-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">VIP Tickets</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    VIP Tickets
+                  </h3>
                 </div>
 
                 <div className="space-y-4">
@@ -576,7 +644,9 @@ const EditEvent: React.FC = () => {
                       Price ($)
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                        $
+                      </span>
                       <input
                         type="number"
                         name="vipPrice.price"
@@ -603,7 +673,9 @@ const EditEvent: React.FC = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
                       placeholder="Unlimited if empty"
                     />
-                    <p className="text-xs text-gray-500 mt-2">Leave empty for unlimited tickets</p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Leave empty for unlimited tickets
+                    </p>
                   </div>
                 </div>
               </div>
@@ -634,13 +706,19 @@ const EditEvent: React.FC = () => {
                     <FaTimes />
                   </button>
                   <div className="mt-2 text-sm text-gray-500">
-                    {imageFile ? 'New image selected' : 'Current image'}
+                    {imageFile ? "New image selected" : "Current image"}
                   </div>
                 </div>
               )}
 
               {/* File Upload */}
-              <div className={`border-2 ${(currentImage || imagePreview) ? 'border-gray-300' : 'border-dashed border-blue-400'} rounded-lg p-8 text-center transition-all hover:border-blue-500 cursor-pointer bg-gray-50`}>
+              <div
+                className={`border-2 ${
+                  currentImage || imagePreview
+                    ? "border-gray-300"
+                    : "border-dashed border-blue-400"
+                } rounded-lg p-8 text-center transition-all hover:border-blue-500 cursor-pointer bg-gray-50`}
+              >
                 <input
                   type="file"
                   id="image-upload"
@@ -653,7 +731,7 @@ const EditEvent: React.FC = () => {
                     <FaUpload className="text-blue-600 text-2xl" />
                   </div>
                   <p className="text-gray-700 mb-2 text-lg">
-                    {currentImage ? 'Change Image' : 'Upload Event Image'}
+                    {currentImage ? "Change Image" : "Upload Event Image"}
                   </p>
                   <p className="text-sm text-gray-500">
                     Click to upload or drag and drop
@@ -681,12 +759,15 @@ const EditEvent: React.FC = () => {
                 className="w-5 h-5 mt-1 text-blue-600 rounded focus:ring-blue-500"
               />
               <div>
-                <label htmlFor="isPublished" className="block text-lg font-medium text-gray-800 cursor-pointer">
+                <label
+                  htmlFor="isPublished"
+                  className="block text-lg font-medium text-gray-800 cursor-pointer"
+                >
                   Publish Event
                 </label>
                 <p className="text-gray-600 mt-2">
-                  If checked, your event will be visible to the public.
-                  If unchecked, it will be saved as a draft.
+                  If checked, your event will be visible to the public. If
+                  unchecked, it will be saved as a draft.
                 </p>
               </div>
             </div>
@@ -707,7 +788,11 @@ const EditEvent: React.FC = () => {
                 type="button"
                 onClick={() => {
                   // Reset form to initial values
-                  if (window.confirm('Are you sure you want to reset all changes?')) {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to reset all changes?"
+                    )
+                  ) {
                     window.location.reload();
                   }
                 }}

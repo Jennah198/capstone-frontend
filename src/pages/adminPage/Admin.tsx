@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { FaList, FaUser } from 'react-icons/fa'
+import { FaList, FaUser, FaBuilding, FaTags, FaImages, FaSignOutAlt, FaThLarge } from 'react-icons/fa'
 import { Link, useNavigate } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
-import axios from 'axios'
 import { useEventContext } from '../../context/EventContext'
 
 interface SidebarLink {
@@ -12,13 +11,16 @@ interface SidebarLink {
 }
 
 const Admin: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+  const { logout } = useEventContext();
   const [activeLink, setActiveLink] = useState<number>(0);
-  
+
   const sidebarLinks: SidebarLink[] = [
-    { name: "Dashboard", path: "", icon: <FaUser className="w-5 h-5" /> },
+    { name: "Dashboard", path: "", icon: <FaThLarge className="w-5 h-5" /> },
     { name: "Users", path: "users", icon: <FaUser className="w-5 h-5" /> },
     { name: "Events", path: "events", icon: <FaList className="w-5 h-5" /> },
+    { name: "Categories", path: "categories", icon: <FaTags className="w-5 h-5" /> },
+    { name: "Venues", path: "venues", icon: <FaBuilding className="w-5 h-5" /> },
+    { name: "Media", path: "media", icon: <FaImages className="w-5 h-5" /> },
     { name: "Orders", path: "admin-orders", icon: <FaList className="w-5 h-5" /> },
   ];
 
@@ -26,12 +28,8 @@ const Admin: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post(`${BASE_URL}/api/users/logout`, {}, {
-        withCredentials: true
-      });
-      if (response.data.success) {
-        navigate("/admin-login");
-      }
+      await logout();
+      navigate("/login");
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -64,8 +62,8 @@ const Admin: React.FC = () => {
 
       <div className='flex items-center justify-end fixed top-0 left-64 right-0 px-4 py-3 border-b bg-white border-b-gray-200'>
         <div>
-          <button 
-            onClick={handleLogout} 
+          <button
+            onClick={handleLogout}
             className='bg-blue-700 text-sm text-white rounded-sm px-4 py-1.5 hover:bg-blue-800 cursor-pointer'
           >
             Logout

@@ -73,7 +73,7 @@ const AdminDashboardStats: React.FC = () => {
       try {
         const res = await getDashboardStats();
         if (res.success) {
-          setStats(res.data);
+          setStats(res.stats);
         }
       } catch (error: any) {
         console.error('Error fetching dashboard stats:', error);

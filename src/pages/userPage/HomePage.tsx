@@ -1,6 +1,7 @@
 // src/pages/userPage/HomePage.tsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { FaVideo } from "react-icons/fa";
 
 import { useEventContext } from "../../context/EventContext";
 
@@ -29,25 +30,36 @@ interface Event {
   image?: string;
 }
 
+interface Media {
+  _id: string;
+  title: string;
+  url: string;
+  type: string;
+}
+
 const HomePage: React.FC = () => {
-  const { getCategories, getVenues, getEvents, BASE_URL } = useEventContext();
+  const { getCategories, getVenues, getEvents, getMedia, BASE_URL } =
+    useEventContext();
   const [categories, setCategories] = useState<Category[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [mediaList, setMediaList] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [catRes, venueRes, evts] = await Promise.all([
+        const [catRes, venueRes, evts, mediaRes] = await Promise.all([
           getCategories(),
           getVenues(),
           getEvents(),
+          getMedia(),
         ]);
         setCategories(catRes.categories || []);
         setVenues(venueRes.venues || []);
         setEvents(evts);
+        setMediaList(mediaRes.media || []);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -55,7 +67,7 @@ const HomePage: React.FC = () => {
       }
     };
     fetchData();
-  }, [getCategories, getVenues, getEvents]);
+  }, [getCategories, getVenues, getEvents, getMedia]);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -82,7 +94,7 @@ const HomePage: React.FC = () => {
             to="/categories-list"
             className="text-green-600 hover:underline"
           >
-            View All (10)
+            View All ({categories.length})
           </Link>
         </div>
 
@@ -102,8 +114,10 @@ const HomePage: React.FC = () => {
                   <img
                     src={
                       cat.image
-                        ? `${BASE_URL}/uploads/${cat.image}`
-                        : "https://via.placeholder.com/300"
+                        ? cat.image.startsWith("http")
+                          ? cat.image
+                          : `${BASE_URL}/uploads/${cat.image}`
+                        : "https://picsum.photos/300/200"
                     }
                     alt={cat.name}
                     className="w-full h-48 object-cover group-hover:scale-110 transition"
@@ -123,7 +137,7 @@ const HomePage: React.FC = () => {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Popular Venue</h2>
           <Link to="/venues" className="text-green-600 hover:underline">
-            View All (1000)
+            View All ({venues.length})
           </Link>
         </div>
 
@@ -139,8 +153,10 @@ const HomePage: React.FC = () => {
                   <img
                     src={
                       venue.image
-                        ? `${BASE_URL}/uploads/${venue.image}`
-                        : "https://via.placeholder.com/300"
+                        ? venue.image.startsWith("http")
+                          ? venue.image
+                          : `${BASE_URL}/uploads/${venue.image}`
+                        : "https://picsum.photos/300/200"
                     }
                     alt={venue.name}
                     className="w-full h-48 object-cover"
@@ -183,7 +199,7 @@ const HomePage: React.FC = () => {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Upcoming Events</h2>
           <Link to="/events" className="text-green-600 hover:underline">
-            View All (50)
+            View All ({events.length})
           </Link>
         </div>
 
@@ -199,8 +215,10 @@ const HomePage: React.FC = () => {
                   <img
                     src={
                       event.image
-                        ? `${BASE_URL}/uploads/${event.image}`
-                        : "https://via.placeholder.com/300"
+                        ? event.image.startsWith("http")
+                          ? event.image
+                          : `${BASE_URL}/uploads/${event.image}`
+                        : "https://picsum.photos/300/200"
                     }
                     alt={event.title}
                     className="w-full h-48 object-cover"
@@ -281,21 +299,33 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
+          {mediaList.slice(0, 4).map((media) => (
             <div
-              key={i}
-              className="bg-gradient-to-b from-green-400 to-green-500 rounded-2xl p-6 text-white"
+              key={media._id}
+              className="bg-gradient-to-b from-green-400 to-green-500 rounded-2xl overflow-hidden text-white"
             >
-              <div className="bg-gray-300 h-32 rounded-lg mb-4" />
-              <p className="text-sm mb-2">
-                LOREM IPSUM dolor sit amet, consectetur
-              </p>
-              <Link
-                to="/media"
-                className="text-sm underline hover:no-underline"
-              >
-                Read More
-              </Link>
+              <div className="h-40">
+                {media.type === "image" ? (
+                  <img
+                    src={media.url}
+                    alt={media.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-black/20">
+                    <FaVideo className="text-4xl" />
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="font-bold mb-1 line-clamp-1">{media.title}</h3>
+                <Link
+                  to="/media"
+                  className="text-xs underline hover:no-underline"
+                >
+                  View Details
+                </Link>
+              </div>
             </div>
           ))}
         </div>

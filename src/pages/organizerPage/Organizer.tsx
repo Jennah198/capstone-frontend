@@ -1,10 +1,15 @@
 // components/Organizer.tsx or pages/Organizer.tsx
-import React, { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaFolder, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
-import { Link, useNavigate, Outlet } from 'react-router-dom';
-import { X, Menu, LayoutDashboard } from 'lucide-react';
-import axios from 'axios';
-import { useEventContext } from '../../context/EventContext';
+import React, { useState } from "react";
+import {
+  FaCalendarAlt,
+  FaFolder,
+  FaMapMarkerAlt,
+  FaUser,
+} from "react-icons/fa";
+import { Link, useNavigate, Outlet } from "react-router-dom";
+import { X, Menu, LayoutDashboard } from "lucide-react";
+import axios from "axios";
+import { useEventContext } from "../../context/EventContext";
 
 interface SidebarItem {
   title: string;
@@ -17,36 +22,35 @@ interface SidebarItem {
 
 const Organizer: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number[]>([]);
-  const { user, BASE_URL, getUserProfile, isSidebarVisible, setIsSidebarVisible } = useEventContext();
+  const { user, BASE_URL, isSidebarVisible, setIsSidebarVisible } =
+    useEventContext();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    getUserProfile();
-  }, [getUserProfile]);
 
   const sidebar: SidebarItem[] = [
     {
-      title: 'Venue',
+      title: "Venue",
       icon: <FaMapMarkerAlt className="w-5 h-5" />,
       children: [
-        { subTitle: 'Create Venue', to: 'create-venue' },
-        { subTitle: 'Venue List', to: 'venue-list' },
+        { subTitle: "Create Venue", to: "create-venue" },
+        { subTitle: "Venue List", to: "venue-list" },
       ],
     },
     {
-      title: 'Category',
+      title: "Category",
       icon: <FaFolder className="w-5 h-5" />,
       children: [
-        { subTitle: 'Create Category', to: 'create-category' },
-        { subTitle: 'Category List', to: 'category-list' },
+        ...(user?.role === "admin"
+          ? [{ subTitle: "Create Category", to: "create-category" }]
+          : []),
+        { subTitle: "Category List", to: "category-list" },
       ],
     },
     {
-      title: 'Event',
+      title: "Event",
       icon: <FaCalendarAlt className="w-5 h-5" />,
       children: [
-        { subTitle: 'Create Event', to: 'create-event' },
-        { subTitle: 'Event List', to: 'event-list' },
+        { subTitle: "Create Event", to: "create-event" },
+        { subTitle: "Event List", to: "event-list" },
       ],
     },
   ];
@@ -65,7 +69,7 @@ const Organizer: React.FC = () => {
         { withCredentials: true }
       );
       if (response.data.success) {
-        navigate('/login');
+        navigate("/login");
       }
     } catch (error) {
       console.log(error);
@@ -76,7 +80,7 @@ const Organizer: React.FC = () => {
     <>
       <div
         className={`h-screen fixed sm:left-0 top-0 w-64 border-r border-r-gray-200 z-10 bg-white overflow-hidden transition-all duration-300 ${
-          isSidebarVisible ? 'left-0' : '-left-64'
+          isSidebarVisible ? "left-0" : "-left-64"
         }`}
       >
         <div>
@@ -114,7 +118,9 @@ const Organizer: React.FC = () => {
                     {side.children.map((child, i) => (
                       <div key={i} className="py-1 pl-2 rounded-sm text-sm">
                         <Link
-                          onClick={() => setIsSidebarVisible((prev: boolean) => !prev)}
+                          onClick={() =>
+                            setIsSidebarVisible((prev: boolean) => !prev)
+                          }
                           className="hover:text-blue-500 duration-150"
                           to={child.to}
                         >
@@ -133,7 +139,11 @@ const Organizer: React.FC = () => {
       <div className="flex items-center justify-between fixed top-0 left-64 right-0 px-4 py-3 border-b bg-white border-b-gray-200 z-10">
         <div className="flex items-center gap-3">
           <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden">
-            <img className="w-full h-full object-cover" src={`${BASE_URL}/uploads/${user?.image}`} alt="Profile" />
+            <img
+              className="w-full h-full object-cover"
+              src={`${BASE_URL}/uploads/${user?.image}`}
+              alt="Profile"
+            />
           </div>
           <div>
             <p className="font-semibold">{user?.name}</p>

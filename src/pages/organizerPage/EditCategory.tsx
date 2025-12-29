@@ -1,9 +1,16 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import axios, { AxiosError } from 'axios';
-import { FaSave, FaSpinner, FaUpload, FaArrowLeft, FaTimes, FaImage } from 'react-icons/fa';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { useEventContext } from '../../context/EventContext';
-import { toastError, toastSuccess } from '../../../utility/toast';
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import axios, { AxiosError } from "axios";
+import {
+  FaSave,
+  FaSpinner,
+  FaUpload,
+  FaArrowLeft,
+  FaTimes,
+  FaImage,
+} from "react-icons/fa";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useEventContext } from "../../context/EventContext";
+import { toastError, toastSuccess } from "../../../utility/toast";
 
 interface FormData {
   name: string;
@@ -22,36 +29,45 @@ interface CategoryResponse {
 }
 
 const EditCategory: React.FC = () => {
-  const { BASE_URL } = useEventContext();
+  const { BASE_URL, user } = useEventContext();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState<boolean>(true);
   const [updating, setUpdating] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>('');
-  
+  const [message, setMessage] = useState<string>("");
+
   const [formData, setFormData] = useState<FormData>({
-    name: ''
+    name: "",
   });
 
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const [currentImage, setCurrentImage] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [currentImage, setCurrentImage] = useState<string>("");
+
+  useEffect(() => {
+    if (user && user.role !== "admin") {
+      navigate("/organizer");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchCategory = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       try {
-        const response = await axios.get<CategoryResponse>(`${BASE_URL}/api/categories/get-single-category/${id}`, { withCredentials: true });
-        
+        const response = await axios.get<CategoryResponse>(
+          `${BASE_URL}/api/categories/get-single-category/${id}`,
+          { withCredentials: true }
+        );
+
         if (response.data.success) {
           const category = response.data.category || response.data.data;
-          
+
           if (category) {
             setFormData({
-              name: category.name || ''
+              name: category.name || "",
             });
 
             if (category.image) {
@@ -60,9 +76,9 @@ const EditCategory: React.FC = () => {
           }
         }
       } catch (error) {
-        console.error('Error fetching category:', error);
-        toastError('Failed to load category data');
-        navigate('/categories');
+        console.error("Error fetching category:", error);
+        toastError("Failed to load category data");
+        navigate("/categories");
       } finally {
         setLoading(false);
       }
@@ -74,14 +90,14 @@ const EditCategory: React.FC = () => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!id) return;
-    
+
     setMessage("");
 
     if (!formData.name.trim()) {
@@ -91,32 +107,32 @@ const EditCategory: React.FC = () => {
 
     try {
       setUpdating(true);
-      
+
       const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name.trim());
-      
+      formDataToSend.append("name", formData.name.trim());
+
       if (image) {
-        formDataToSend.append('image', image);
+        formDataToSend.append("image", image);
       }
 
       const res = await axios.put(
-        `${BASE_URL}/api/categories/update-category/${id}`, 
-        formDataToSend, 
+        `${BASE_URL}/api/categories/update-category/${id}`,
+        formDataToSend,
         { withCredentials: true }
       );
 
       if (res.data.success) {
         toastSuccess(res.data.message);
-        navigate('/organizer/category-list');
+        navigate("/organizer/category-list");
       }
-
     } catch (err) {
       console.log(err);
       const error = err as AxiosError;
-      
+
       if (error.response) {
         const responseData = error.response.data as { message?: string };
-        const errorMessage = responseData.message || "Failed to update category";
+        const errorMessage =
+          responseData.message || "Failed to update category";
         setMessage(errorMessage);
         toastError(errorMessage);
       } else {
@@ -145,15 +161,17 @@ const EditCategory: React.FC = () => {
 
   const removeImage = () => {
     setImage(null);
-    setImagePreview('');
-    setCurrentImage('');
+    setImagePreview("");
+    setCurrentImage("");
   };
 
   if (loading) {
     return (
       <div className="ml-4 p-8 flex justify-center items-center min-h-screen">
         <FaSpinner className="animate-spin text-blue-600 text-4xl" />
-        <span className="ml-4 text-gray-600 text-lg">Loading category data...</span>
+        <span className="ml-4 text-gray-600 text-lg">
+          Loading category data...
+        </span>
       </div>
     );
   }
@@ -171,7 +189,9 @@ const EditCategory: React.FC = () => {
 
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Edit Category</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            Edit Category
+          </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Category Name */}
@@ -195,7 +215,7 @@ const EditCategory: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category Image
               </label>
-              
+
               {/* Current Image Preview */}
               {(currentImage || imagePreview) && (
                 <div className="mb-4 relative inline-block">
@@ -214,7 +234,7 @@ const EditCategory: React.FC = () => {
                     </button>
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    {image ? 'New image selected' : 'Current image'}
+                    {image ? "New image selected" : "Current image"}
                   </div>
                 </div>
               )}
@@ -225,11 +245,16 @@ const EditCategory: React.FC = () => {
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <FaUpload className="w-8 h-8 text-gray-400 mb-2" />
                     <p className="mb-2 text-sm text-gray-500">
-                      <span className="font-semibold">Click to upload</span> or drag and drop
+                      <span className="font-semibold">Click to upload</span> or
+                      drag and drop
                     </p>
-                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                    <p className="text-xs text-gray-500">
+                      PNG, JPG, GIF up to 5MB
+                    </p>
                     <p className="text-xs text-gray-400 mt-1">
-                      {currentImage ? 'Upload new image to replace current' : 'Upload category image'}
+                      {currentImage
+                        ? "Upload new image to replace current"
+                        : "Upload category image"}
                     </p>
                   </div>
                   <input
@@ -258,7 +283,7 @@ const EditCategory: React.FC = () => {
               >
                 Cancel
               </Link>
-              
+
               <button
                 type="submit"
                 disabled={updating}

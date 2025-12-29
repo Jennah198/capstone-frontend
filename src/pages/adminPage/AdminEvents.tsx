@@ -82,7 +82,7 @@ const AdminEventListPage: React.FC = () => {
     category: 'all',
     dateRange: 'all'
   });
-  
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<string | null>(null);
@@ -95,11 +95,11 @@ const AdminEventListPage: React.FC = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      
+
       const params = new URLSearchParams({
         ...filters
       } as any);
-      
+
       if (searchTerm) {
         params.append('search', searchTerm);
       }
@@ -140,8 +140,8 @@ const AdminEventListPage: React.FC = () => {
       );
 
       if (response.data.success) {
-        setEvents(events.map(event => 
-          event.id === eventId 
+        setEvents(events.map(event =>
+          event.id === eventId
             ? { ...event, isPublished: !currentStatus }
             : event
         ));
@@ -249,7 +249,7 @@ const AdminEventListPage: React.FC = () => {
           <FaArrowLeft />
           <span className="hidden sm:inline">Back to Dashboard</span>
         </button>
-        
+
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-gray-800">Event Management</h1>
@@ -257,7 +257,7 @@ const AdminEventListPage: React.FC = () => {
               {events.length} events found
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -465,7 +465,7 @@ const AdminEventListPage: React.FC = () => {
             const status = getEventStatus(event);
             const statusBadge = getStatusBadge(status);
             const availableTickets = getAvailableTickets(event);
-            
+
             return (
               <div key={event.id} className="bg-white rounded-lg shadow overflow-hidden">
                 {/* Desktop View */}
@@ -478,7 +478,7 @@ const AdminEventListPage: React.FC = () => {
                           <div className="w-16 h-16 shrink-0">
                             {event.image ? (
                               <img
-                                src={`${BASE_URL}/uploads/${event.image}`}
+                                src={event.image?.startsWith('http') ? event.image : `${BASE_URL}/uploads/${event.image}`}
                                 alt={event.title}
                                 className="w-full h-full object-cover rounded-lg"
                                 onError={(e) => {
@@ -552,11 +552,10 @@ const AdminEventListPage: React.FC = () => {
                           </div>
                           <button
                             onClick={() => handleTogglePublish(event.id, event.isPublished)}
-                            className={`flex items-center gap-1 px-2 py-1 rounded text-xs w-full justify-center ${
-                              event.isPublished
+                            className={`flex items-center gap-1 px-2 py-1 rounded text-xs w-full justify-center ${event.isPublished
                                 ? 'bg-green-100 text-green-800 hover:bg-green-200'
                                 : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                            }`}
+                              }`}
                           >
                             {event.isPublished ? (
                               <>
@@ -583,7 +582,7 @@ const AdminEventListPage: React.FC = () => {
                             <FaEye />
                             <span>View</span>
                           </button>
-                          
+
                           <button
                             onClick={() => handleDeleteEvent(event.id)}
                             className="px-3 py-2 bg-red-100 text-red-800 text-sm cursor-pointer rounded-lg hover:bg-red-200 transition flex items-center gap-2"
@@ -606,7 +605,7 @@ const AdminEventListPage: React.FC = () => {
                         <div className="w-12 h-12 shrink-0">
                           {event.image ? (
                             <img
-                              src={`${BASE_URL}/uploads/${event.image}`}
+                              src={event.image?.startsWith('http') ? event.image : `${BASE_URL}/uploads/${event.image}`}
                               alt={event.title}
                               className="w-full h-full object-cover rounded-lg"
                               onError={(e) => {
@@ -631,7 +630,7 @@ const AdminEventListPage: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Mobile Menu Button */}
                       <button
                         onClick={() => setMobileMenuOpen(mobileMenuOpen === event.id ? null : event.id)}
@@ -649,11 +648,10 @@ const AdminEventListPage: React.FC = () => {
                       </div>
                       <button
                         onClick={() => handleTogglePublish(event.id, event.isPublished)}
-                        className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${
-                          event.isPublished
+                        className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${event.isPublished
                             ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-800'
-                        }`}
+                          }`}
                       >
                         {event.isPublished ? (
                           <>
@@ -729,7 +727,7 @@ const AdminEventListPage: React.FC = () => {
                           <FaEye className="text-blue-600" />
                           View Event
                         </button>
-                        
+
                         <button
                           onClick={() => {
                             handleDeleteEvent(event.id);
@@ -785,7 +783,7 @@ const AdminEventListPage: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-3 md:p-4">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-2 bg-yellow-100 rounded-lg">
@@ -799,7 +797,7 @@ const AdminEventListPage: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-3 md:p-4">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-2 bg-green-100 rounded-lg">
@@ -813,7 +811,7 @@ const AdminEventListPage: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-3 md:p-4">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-2 bg-purple-100 rounded-lg">
