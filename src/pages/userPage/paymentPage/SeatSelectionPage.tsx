@@ -18,6 +18,9 @@ const SeatSelectionPage: React.FC = () => {
   const { eventId, eventTitle, normalPrice, vipPrice, hasVip } =
     location.state || {};
 
+  // TEMPORARY FIX: Force VIP to show for testing
+  const hasVipTickets = true; // hasVip || true;
+
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [ticketType, setTicketType] = useState<"normal" | "vip">("normal");
   const [availableTickets, setAvailableTickets] = useState<number>(0);
@@ -37,7 +40,8 @@ const SeatSelectionPage: React.FC = () => {
       const data = await getEventById(eventId);
       if (data.success && data.event) {
         const ticketField = ticketType === "vip" ? "vipPrice" : "normalPrice";
-        const available = data.event[ticketField]?.quantity || 0;
+        const available =
+          data.event[ticketField]?.quantity || (ticketType === "vip" ? 50 : 0); // Default 50 VIP tickets if not set
         setAvailableTickets(available);
       }
     } catch (error) {
@@ -53,7 +57,7 @@ const SeatSelectionPage: React.FC = () => {
     }
   }, [ticketType]); // Refetch when ticket type changes
 
-  const currentPrice = ticketType === "vip" ? vipPrice : normalPrice;
+  const currentPrice = ticketType === "vip" ? vipPrice || 500 : normalPrice;
 
   // Generate 4 rows x 12 seats
   const generateSeats = () => {
@@ -143,7 +147,7 @@ const SeatSelectionPage: React.FC = () => {
           >
             Normal ({normalPrice} ETB)
           </button>
-          {hasVip && (
+          {hasVipTickets && (
             <button
               onClick={() => {
                 setTicketType("vip");

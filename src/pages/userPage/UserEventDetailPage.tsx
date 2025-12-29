@@ -1,6 +1,6 @@
 // src/pages/userPage/UserEventDetailPage.tsx
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -8,9 +8,9 @@ import {
   FaShare,
   FaSpinner,
   FaExclamationCircle,
-} from 'react-icons/fa';
-import { format, parseISO } from 'date-fns';
-import { useEventContext } from '../../context/EventContext';
+} from "react-icons/fa";
+import { format, parseISO } from "date-fns";
+import { useEventContext } from "../../context/EventContext";
 
 interface Organizer {
   name?: string;
@@ -58,21 +58,28 @@ const UserEventDetailPage: React.FC = () => {
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // === MOCK DATA FOR DEMO (when no real event found) ===
   const mockEvents: Record<string, Event> = {
     "1": {
       _id: "1",
       title: "Aster Aweke Grand Last Concert",
-      description: "Join us for an unforgettable night with the legendary Ethiopian singer Aster Aweke as she performs her greatest hits in a grand farewell concert. A once-in-a-lifetime musical experience filled with emotion, culture, and timeless melodies.",
-      image: "https://images.unsplash.com/photo-1493676304819-0d7c9c9a1d5d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+      description:
+        "Join us for an unforgettable night with the legendary Ethiopian singer Aster Aweke as she performs her greatest hits in a grand farewell concert. A once-in-a-lifetime musical experience filled with emotion, culture, and timeless melodies.",
+      image:
+        "https://images.unsplash.com/photo-1493676304819-0d7c9c9a1d5d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
       startDate: "2025-12-31T20:00:00",
       isPublished: true,
       createdAt: "2025-01-01",
       updatedAt: "2025-01-01",
       organizer: { name: "Chillux Events" },
-      venue: { name: "Millennium Hall", city: "Addis Ababa", address: "Bole, Addis Ababa", capacity: 10000 },
+      venue: {
+        name: "Millennium Hall",
+        city: "Addis Ababa",
+        address: "Bole, Addis Ababa",
+        capacity: 10000,
+      },
       category: { name: "Concert" },
       normalPrice: { price: 1250 },
       vipPrice: { price: 2500 },
@@ -91,7 +98,7 @@ const UserEventDetailPage: React.FC = () => {
   const fetchEventDetails = async () => {
     if (!id) return;
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const data = await getEventById(id);
@@ -99,16 +106,18 @@ const UserEventDetailPage: React.FC = () => {
       if (data.success && data.event) {
         setEvent(data.event);
       } else {
-        throw new Error('Event not found');
+        throw new Error("Event not found");
       }
     } catch (err: any) {
-      console.warn('Real event not found, falling back to mock data for demo...');
+      console.warn(
+        "Real event not found, falling back to mock data for demo..."
+      );
       const mockEvent = mockEvents[id as keyof typeof mockEvents];
       if (mockEvent) {
         setEvent(mockEvent);
-        setError('');
+        setError("");
       } else {
-        setError('Event not found. Try a valid event ID.');
+        setError("Event not found. Try a valid event ID.");
       }
     } finally {
       setLoading(false);
@@ -117,17 +126,17 @@ const UserEventDetailPage: React.FC = () => {
 
   const formatDate = (dateString: string): string => {
     try {
-      return format(parseISO(dateString), 'EEEE, MMMM dd, yyyy');
+      return format(parseISO(dateString), "EEEE, MMMM dd, yyyy");
     } catch {
-      return 'Date TBD';
+      return "Date TBD";
     }
   };
 
   const formatTime = (dateString: string): string => {
     try {
-      return format(parseISO(dateString), 'hh:mm a');
+      return format(parseISO(dateString), "hh:mm a");
     } catch {
-      return 'Time TBD';
+      return "Time TBD";
     }
   };
 
@@ -140,20 +149,23 @@ const UserEventDetailPage: React.FC = () => {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('Event link copied!');
+      alert("Event link copied!");
     }
   };
 
   const handleGetTicket = () => {
     if (!event) return;
-    navigate('/seat-selection', {
+    navigate("/seat-selection", {
       state: {
         eventId: event._id,
         eventTitle: event.title,
         normalPrice: event.normalPrice?.price || 0,
         vipPrice: event.vipPrice?.price || 0,
-        hasVip: event.hasVipTicket
-      }
+        hasVip:
+          event.vipPrice &&
+          event.vipPrice.price > 0 &&
+          event.vipPrice.quantity > 0,
+      },
     });
   };
 
@@ -161,7 +173,9 @@ const UserEventDetailPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex justify-center items-center">
         <FaSpinner className="animate-spin text-green-600 text-4xl" />
-        <span className="ml-4 text-gray-600 text-lg">Loading event details...</span>
+        <span className="ml-4 text-gray-600 text-lg">
+          Loading event details...
+        </span>
       </div>
     );
   }
@@ -171,9 +185,14 @@ const UserEventDetailPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md text-center">
           <FaExclamationCircle className="text-red-500 text-6xl mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Event Not Found</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Event Not Found
+          </h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Link to="/" className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition">
+          <Link
+            to="/"
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+          >
             Back to Home
           </Link>
         </div>
@@ -188,7 +207,9 @@ const UserEventDetailPage: React.FC = () => {
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <nav className="text-sm text-gray-500">
-          <Link to="/" className="hover:text-green-600">Event</Link>
+          <Link to="/" className="hover:text-green-600">
+            Event
+          </Link>
           <span className="mx-2">→</span>
           <span className="text-gray-900 font-medium">Event Details</span>
         </nav>
@@ -208,7 +229,10 @@ const UserEventDetailPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
               <img
-                src={event.image || 'https://images.unsplash.com/photo-1493676304819-0d7c9c9a1d5d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'}
+                src={
+                  event.image ||
+                  "https://images.unsplash.com/photo-1493676304819-0d7c9c9a1d5d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+                }
                 alt={event.title}
                 className="w-full h-96 object-cover"
               />
@@ -224,12 +248,20 @@ const UserEventDetailPage: React.FC = () => {
           {/* Right - Details */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                {event.title}
+              </h1>
 
               <div className="flex flex-wrap gap-3 mb-8">
-                <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Music</span>
-                <span className="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">Concert</span>
-                <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">Live</span>
+                <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                  Music
+                </span>
+                <span className="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                  Concert
+                </span>
+                <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                  Live
+                </span>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8 mb-10">
@@ -240,7 +272,8 @@ const UserEventDetailPage: React.FC = () => {
                   <div>
                     <p className="font-medium text-gray-700">Date and Time</p>
                     <p className="text-xl font-bold text-gray-900">
-                      {formatDate(event.startDate)} at {formatTime(event.startDate)}
+                      {formatDate(event.startDate)} at{" "}
+                      {formatTime(event.startDate)}
                     </p>
                   </div>
                 </div>
@@ -251,7 +284,9 @@ const UserEventDetailPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-700">Location</p>
-                    <p className="text-xl font-bold text-gray-900">{event.venue?.name || 'TBD'}</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      {event.venue?.name || "TBD"}
+                    </p>
                     <p className="text-gray-600">{event.venue?.city}</p>
                   </div>
                 </div>
@@ -261,13 +296,17 @@ const UserEventDetailPage: React.FC = () => {
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-1">Regular</p>
                   <p className="text-3xl font-bold text-gray-900">
-                    {event.normalPrice?.price ? `${event.normalPrice.price}ETB` : 'Free'}
+                    {event.normalPrice?.price
+                      ? `${event.normalPrice.price}ETB`
+                      : "Free"}
                   </p>
                 </div>
                 {event.vipPrice?.price && (
                   <div className="text-center">
                     <p className="text-sm text-gray-600 mb-1">VIP</p>
-                    <p className="text-3xl font-bold text-purple-600">{event.vipPrice.price}ETB</p>
+                    <p className="text-3xl font-bold text-purple-600">
+                      {event.vipPrice.price}ETB
+                    </p>
                   </div>
                 )}
               </div>
@@ -280,9 +319,12 @@ const UserEventDetailPage: React.FC = () => {
               </button>
 
               <div className="mt-12">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">About the Event</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                  About the Event
+                </h2>
                 <p className="text-gray-700 leading-relaxed">
-                  {event.description || 'Experience an amazing night of live music and entertainment.'}
+                  {event.description ||
+                    "Experience an amazing night of live music and entertainment."}
                 </p>
               </div>
             </div>

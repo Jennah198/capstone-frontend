@@ -11,11 +11,14 @@ import {
 } from "react-icons/fa";
 import QRCode from "react-qr-code";
 import html2canvas from "html2canvas";
+import axios from "axios";
+import { useEventContext } from "../../../context/EventContext";
 
 const TicketSuccessPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const ticketRef = useRef<HTMLDivElement>(null);
+  const { BASE_URL } = useEventContext();
 
   const { order, tickets, event } = location.state || {};
 
@@ -26,14 +29,28 @@ const TicketSuccessPage: React.FC = () => {
 
   const ticket = tickets[0]; // Show first ticket
 
-  const handleDownload = () => {
-    if (ticketRef.current) {
-      html2canvas(ticketRef.current).then((canvas) => {
-        const link = document.createElement("a");
-        link.download = `ticket-${ticket?.ticketCode}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-      });
+  const handleDownload = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/api/tickets/${ticket._id}/download`,
+        {
+          withCredentials: true,
+          responseType: "blob", // Important for downloading files
+        }
+      );
+
+      // Create a blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Ticket-${ticket.ticketCode}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading ticket:", error);
+      alert("Failed to download ticket. Please try again.");
     }
   };
 
