@@ -48,3 +48,39 @@ capstone-frontend/
 │── tsconfig.json       # TypeScript configuration
 │── vite.config.ts      # Vite bundler configuration
 └── package.json        # Dependencies and scripts
+```
+
+## ⚙️ Installation & Setup
+
+### 1️⃣ Clone the Repository
+```bash
+git clone [https://github.com/Jennah198/capstone-frontend.git](https://github.com/Jennah198/capstone-frontend.git)
+cd capstone-frontend
+
+```
+### 2️⃣ Install Dependencies
+```bash
+npm install
+
+```
+### 3️⃣ Environment Configuration
+Create a `.env` file in the  root directory and add the following variables:
+
+
+
+```ini
+VITE_API_URL=http://localhost:5000/api
+
+```
+
+## ▶️ Running the Application
+
+| Mode | Command | Description |
+| :--- | :--- | :--- |
+| **Development** | `npm run dev` | Starts server with **Nodemon** (auto-restart) |
+| **Build** | `npm run build` | Compiles and optimizes for production|
+
+The application will be accessible at: http://localhost:5173
+
+---
+
