@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { 
   FaCalendarAlt, 
-  FaUsers, 
   FaDollarSign, 
   FaEye, 
   FaTicketAlt,
@@ -12,13 +11,11 @@ import {
   FaArrowUp,
   FaArrowDown,
   FaSpinner,
-  FaClock,
-  FaMapMarkerAlt,
-  FaTag
+  FaClock
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useEventContext } from '../../context/EventContext';
-import { format, subDays, isWithinInterval, startOfMonth, endOfMonth } from 'date-fns';
+import { format, subDays, isWithinInterval } from 'date-fns';
 
 interface Event {
   _id: string;
@@ -126,8 +123,6 @@ const OrganizerDashboard: React.FC = () => {
 
   const calculateStats = (events: Event[]) => {
     const now = new Date();
-    const thirtyDaysAgo = subDays(now, 30);
-    
     const totalEvents = events.length;
     const publishedEvents = events.filter(e => e.isPublished).length;
     const draftEvents = events.filter(e => !e.isPublished).length;

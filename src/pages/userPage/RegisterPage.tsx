@@ -71,11 +71,6 @@ const RegisterPage: React.FC = () => {
     }
   };
 
-  const resetType = () => {
-    setForm((prev) => ({ ...prev, secretKey: "", role: "user" }));
-    setMessage(null);
-  };
-
   const setRole = (role: string) => {
     setForm((prev) => ({
       ...prev,

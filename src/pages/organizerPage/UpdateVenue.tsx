@@ -1,7 +1,7 @@
 // pages/UpdateVenue.tsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaSave, FaSpinner, FaUpload, FaArrowLeft, FaTimes } from 'react-icons/fa';
+import { FaSave, FaSpinner, FaArrowLeft } from 'react-icons/fa';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useEventContext } from '../../context/EventContext';
 import { toastError, toastSuccess } from '../../../utility/toast';
@@ -30,10 +30,6 @@ const UpdateVenue: React.FC = () => {
     capacity: '',
   });
 
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const [currentImage, setCurrentImage] = useState<string>('');
-
   useEffect(() => {
     const fetchVenue = async () => {
       setLoading(true);
@@ -53,9 +49,6 @@ const UpdateVenue: React.FC = () => {
             capacity: venue.capacity ? venue.capacity.toString() : '',
           });
 
-          if (venue.image) {
-            setCurrentImage(`${BASE_URL}/uploads/${venue.image}`);
-          }
         }
       } catch (error) {
         console.error('Error fetching venue:', error);
@@ -94,10 +87,6 @@ const UpdateVenue: React.FC = () => {
       formDataToSend.append('country', formData.country);
       formDataToSend.append('capacity', formData.capacity);
 
-      if (image) {
-        formDataToSend.append('image', image);
-      }
-
       const res = await axios.put(`${BASE_URL}/api/venues/update-venue/${id}`, formDataToSend, {
         withCredentials: true,
       });
@@ -117,23 +106,6 @@ const UpdateVenue: React.FC = () => {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeImage = () => {
-    setImage(null);
-    setImagePreview('');
-    setCurrentImage('');
-  };
 
   if (loading) {
     return (

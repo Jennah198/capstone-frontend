@@ -1,7 +1,6 @@
 // src/pages/userPage/AboutPage.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaTicketAlt, FaUsers, FaCalendarCheck, FaStar } from 'react-icons/fa';
 
 const AboutPage: React.FC = () => {
   return (

@@ -7,7 +7,7 @@ import {
   FaUser,
 } from "react-icons/fa";
 import { Link, useNavigate, Outlet } from "react-router-dom";
-import { X, Menu, LayoutDashboard } from "lucide-react";
+import { X, LayoutDashboard } from "lucide-react";
 import axios from "axios";
 import { useEventContext } from "../../context/EventContext";
 

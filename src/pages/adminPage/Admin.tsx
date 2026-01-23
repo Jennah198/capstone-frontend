@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FaList, FaUser, FaBuilding, FaTags, FaImages, FaSignOutAlt, FaThLarge } from 'react-icons/fa'
+import { FaList, FaUser, FaBuilding, FaTags, FaImages, FaThLarge } from 'react-icons/fa'
 import { Link, useNavigate } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
 import { useEventContext } from '../../context/EventContext'

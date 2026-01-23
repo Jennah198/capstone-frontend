@@ -104,7 +104,6 @@ const CategoryEventsPage: React.FC = () => {
   };
 
   const getEventStatus = (event: Event): 'upcoming' | 'ongoing' | 'completed' => {
-    const now = new Date();
     const startDate = new Date(event.startDate);
     const endDate = event.endDate ? new Date(event.endDate) : null;
 
@@ -121,11 +120,6 @@ const CategoryEventsPage: React.FC = () => {
     };
     return badges[status] || badges.upcoming;
   };
-
-  const minPrice = Math.min(
-    events.reduce((min, e) => Math.min(min, e.normalPrice?.price ?? Infinity, e.vipPrice?.price ?? Infinity), Infinity),
-    Infinity
-  );
 
   if (loading) {
     return (

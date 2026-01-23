@@ -4,7 +4,6 @@ import {
   FaPlus,
   FaEdit,
   FaTrash,
-  FaImage,
   FaSpinner,
   FaSearch,
   FaTimes,

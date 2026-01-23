@@ -15,7 +15,7 @@ const SeatSelectionPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { getEventById } = useEventContext();
-  const { eventId, eventTitle, normalPrice, vipPrice, hasVip } =
+  const { eventId, eventTitle, normalPrice, vipPrice } =
     location.state || {};
 
   // TEMPORARY FIX: Force VIP to show for testing
@@ -24,7 +24,6 @@ const SeatSelectionPage: React.FC = () => {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [ticketType, setTicketType] = useState<"normal" | "vip">("normal");
   const [availableTickets, setAvailableTickets] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!eventId) {
@@ -46,8 +45,6 @@ const SeatSelectionPage: React.FC = () => {
       }
     } catch (error) {
       console.error("Error fetching event:", error);
-    } finally {
-      setLoading(false);
     }
   };
 

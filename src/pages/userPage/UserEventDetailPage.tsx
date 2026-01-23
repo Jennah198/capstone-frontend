@@ -163,7 +163,9 @@ const UserEventDetailPage: React.FC = () => {
         vipPrice: event.vipPrice?.price || 0,
         hasVip:
           event.vipPrice &&
+          event.vipPrice.price !== undefined &&
           event.vipPrice.price > 0 &&
+          event.vipPrice.quantity !== undefined &&
           event.vipPrice.quantity > 0,
       },
     });

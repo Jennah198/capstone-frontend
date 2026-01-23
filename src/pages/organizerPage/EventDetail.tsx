@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -9,8 +9,6 @@ import {
   FaEdit,
   FaTrash,
   FaSpinner,
-  FaDollarSign,
-  FaUsers,
   FaClock,
   FaUser,
   FaImage,
@@ -18,7 +16,6 @@ import {
   FaPrint,
   FaCheckCircle,
   FaTimesCircle,
-  FaGlobe,
   FaPhone,
   FaEnvelope,
   FaTicketAlt,
@@ -162,7 +159,6 @@ const EventDetail: React.FC = () => {
 
   // Get event status
   const getEventStatus = (event: Event): Status => {
-    const now = new Date();
     const startDate = new Date(event.startDate);
     const endDate = event.endDate ? new Date(event.endDate) : null;
 

@@ -81,14 +81,7 @@ const UserOrdersPage: React.FC = () => {
 
   const downloadAllTickets = async (orderId: string) => {
     try {
-      const response = await downloadOrderTickets(orderId);
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Tickets-${orderId}.zip`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      await downloadOrderTickets(orderId);
     } catch {
       alert('Download failed');
     }

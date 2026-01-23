@@ -1,4 +1,5 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import React, { useState, useEffect } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import axios, { AxiosError } from "axios";
 import {
   FaSave,
@@ -35,7 +36,6 @@ const EditCategory: React.FC = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [updating, setUpdating] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -98,8 +98,6 @@ const EditCategory: React.FC = () => {
     e.preventDefault();
     if (!id) return;
 
-    setMessage("");
-
     if (!formData.name.trim()) {
       toastError("Category name is required");
       return;
@@ -133,11 +131,9 @@ const EditCategory: React.FC = () => {
         const responseData = error.response.data as { message?: string };
         const errorMessage =
           responseData.message || "Failed to update category";
-        setMessage(errorMessage);
         toastError(errorMessage);
       } else {
         const errorMessage = "Server not responding. Please try again later.";
-        setMessage(errorMessage);
         toastError(errorMessage);
       }
     } finally {

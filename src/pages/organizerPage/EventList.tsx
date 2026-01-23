@@ -119,7 +119,6 @@ const EventList: React.FC = () => {
   };
 
   const getEventStatus = (event: Event): string => {
-    const now = new Date();
     const startDate = new Date(event.startDate);
     const endDate = event.endDate ? new Date(event.endDate) : null;
 

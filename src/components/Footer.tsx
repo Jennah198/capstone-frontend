@@ -1,7 +1,7 @@
 // src/components/Footer.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaCalendarAlt } from 'react-icons/fa';
+import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
 
 const Footer: React.FC = () => {
   return (

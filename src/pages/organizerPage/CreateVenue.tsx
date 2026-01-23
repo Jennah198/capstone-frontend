@@ -1,4 +1,5 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import axios, { AxiosError } from 'axios';
 import { FaPlus, FaSpinner, FaUpload } from 'react-icons/fa';
 import { useEventContext } from '../../context/EventContext';

@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import {
   FaUsers,
   FaUser,
   FaUserTie,
   FaUserShield,
   FaSpinner,
-  FaEdit,
   FaSearch,
   FaFilter,
-  FaEye,
   FaEnvelope,
   FaCalendarAlt
 } from 'react-icons/fa';
@@ -331,7 +329,6 @@ const AdminUsers: React.FC = () => {
             <div className="md:hidden divide-y divide-gray-200">
               {filteredUsers.map((user) => {
                 const roleBadge = getRoleBadge(user.role);
-                const RoleIcon = roleBadge.icon;
 
                 return (
                   <div key={user._id} className="p-4 hover:bg-gray-50">

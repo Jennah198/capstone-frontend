@@ -4,11 +4,9 @@ import { Link } from 'react-router-dom';
 import { 
   FaCalendarAlt, 
   FaMapMarkerAlt, 
-  FaTag, 
   FaDollarSign, 
   FaUsers,
   FaClock,
-  FaTicketAlt,
   FaArrowRight,
   FaSpinner
 } from 'react-icons/fa';
@@ -107,7 +105,6 @@ const LatestEvents: React.FC = () => {
   };
 
   const getEventStatus = (event: Event): EventStatus => {
-    const now = new Date();
     const startDate = new Date(event.startDate);
     const endDate = event.endDate ? new Date(event.endDate) : null;
 

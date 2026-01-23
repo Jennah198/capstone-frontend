@@ -10,7 +10,6 @@ import {
   FaUser,
 } from "react-icons/fa";
 import QRCode from "react-qr-code";
-import html2canvas from "html2canvas";
 import axios from "axios";
 import { useEventContext } from "../../../context/EventContext";
 

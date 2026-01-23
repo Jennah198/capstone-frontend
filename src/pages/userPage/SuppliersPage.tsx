@@ -94,8 +94,7 @@ const SuppliersPage: React.FC = () => {
   };
 
   const handleDeleteSupplier = async (
-    id: string,
-    type: "photographer" | "designer"
+    id: string
   ) => {
     if (!confirm("Are you sure you want to delete this supplier?")) return;
 
@@ -255,7 +254,7 @@ const SuppliersPage: React.FC = () => {
                       </button>
                       <button
                         onClick={() =>
-                          handleDeleteSupplier(supplier._id, "photographer")
+                          handleDeleteSupplier(supplier._id)
                         }
                         className="bg-red-500 hover:bg-red-600 text-white p-1 rounded"
                       >
@@ -335,7 +334,7 @@ const SuppliersPage: React.FC = () => {
                       </button>
                       <button
                         onClick={() =>
-                          handleDeleteSupplier(designer._id, "designer")
+                          handleDeleteSupplier(designer._id)
                         }
                         className="bg-red-500 hover:bg-red-600 text-white p-1 rounded"
                       >

@@ -97,10 +97,6 @@ const AdminDashboardStats: React.FC = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString();
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64 mt-20">

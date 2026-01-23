@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import {
   FaSearch,
   FaFilter,
@@ -14,7 +14,6 @@ import {
   FaToggleOff,
   FaSpinner,
   FaArrowLeft,
-  FaPlus,
   FaTag,
   FaUser,
   FaCheckCircle,
@@ -63,7 +62,6 @@ interface Event {
 }
 
 type EventStatus = 'draft' | 'published' | 'upcoming' | 'ongoing' | 'completed';
-type FilterType = 'all' | 'draft' | 'published' | 'upcoming' | 'ongoing' | 'completed';
 
 interface Filters {
   status: string;
