@@ -18,10 +18,8 @@ const Navbar: React.FC = () => {
   const publicLinks = [
     { to: "/", label: "Home", icon: <FaHome /> }, // Only Home has icon
     { to: "/events", label: "Events" },
-    { to: "/suppliers", label: "Suppliers" },
     { to: "/about", label: "About Us" },
     { to: "/contact", label: "Contact Us" },
-    { to: "/blog", label: "Blog" },
     { to: "/my-order", label: "My Orders" },
   ];
 

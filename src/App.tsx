@@ -19,7 +19,6 @@ import HomePage from "./pages/userPage/HomePage";
 import UserLogin from "./pages/userPage/UserLogin";
 import RegisterPage from "./pages/userPage/RegisterPage";
 import EventsPage from "./pages/userPage/EventsPage";
-import SuppliersPage from "./pages/userPage/SuppliersPage";
 import ContactPage from "./pages/userPage/ContactPage";
 import UserEventDetailPage from "./pages/userPage/UserEventDetailPage";
 import UserOrdersPage from "./pages/userPage/UserOrderPage";
@@ -75,7 +74,6 @@ const App: React.FC = () => {
           <Route element={<UserLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/events" element={<EventsPage />} />
-            <Route path="/suppliers" element={<SuppliersPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<UserLogin />} />
