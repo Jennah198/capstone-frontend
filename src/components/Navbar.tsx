@@ -1,7 +1,7 @@
 // src/components/Navbar.tsx
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaHome, FaSignOutAlt, FaTimes, FaBars } from "react-icons/fa";
+import { FaHome, FaSignOutAlt, FaTimes, FaBars, FaSearch } from "react-icons/fa";
 import { useEventContext } from "../context/EventContext";
 import axios from "axios";
 
@@ -72,103 +72,124 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
+    <nav
+      role="navigation"
+      aria-label="Main navigation"
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm bg-white/70 shadow-md border-b border-gray-100"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
-                  Event<span className="text-gray-900">X</span>
-                </h1>
-                <p className="text-[15px] text-gray-500">
-                  | Extraordinary Events
-                </p>
+          <div className="flex items-center flex-none">
+            <Link to="/" className="flex items-center gap-3" aria-label="Home">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-extrabold shadow-sm">
+                  EX
+                </div>
+                <div>
+                  <h1 className="text-lg md:text-2xl font-bold text-gray-900 leading-tight">
+                    Event<span className="text-green-600">X</span>
+                  </h1>
+                  <p className="text-xs text-gray-500 hidden md:block">Extraordinary Events</p>
+                </div>
               </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navigationLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(link.to)
-                    ? "text-green-600 bg-green-50"
-                    : "text-gray-700 hover:text-green-600 hover:bg-gray-50"
-                }`}
-              >
-                {link.icon || null}{" "}
-                {/* Only show icon if it exists (only Home has one) */}
-                {link.label}
-              </Link>
-            ))}
-
-            {/* Auth Section */}
-            {user ? (
-              <div className="flex items-center gap-6 border-l border-gray-200 pl-8">
-                <div className="flex items-center gap-3">
-                  <div className="relative group cursor-pointer">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-bold text-lg shadow-md ring-2 ring-white ring-offset-2 hover:scale-105 transition-transform duration-200">
-                      {user.name?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    {/* User Status Dot */}
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-gray-900 leading-tight">
-                      {user.name || "User"}
-                    </span>
-                    <span className="text-[11px] text-green-600 font-semibold uppercase tracking-wider">
-                      {user.role || "Member"}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-700 p-2.5 rounded-full transition-all duration-300 group"
-                  title="Logout"
-                >
-                  <FaSignOutAlt className="group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-6">
+          {/* Center nav */}
+          <div className="hidden md:flex md:items-center md:flex-1 md:justify-center">
+            <div className="flex items-center space-x-6 whitespace-nowrap">
+              {navigationLinks.map((link) => (
                 <Link
-                  to="/login"
-                  className="text-gray-700 hover:text-green-600 font-semibold transition"
+                  key={link.to}
+                  to={link.to}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive(link.to)
+                      ? "text-green-600 bg-green-50"
+                      : "text-gray-700 hover:text-green-600 hover:bg-gray-50"
+                  }`}
                 >
-                  Sign In
+                  {link.icon && <span className="mr-1">{link.icon}</span>}
+                  {link.label}
                 </Link>
-                <Link
-                  to="/register"
-                  className="bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white px-7 py-2.5 rounded-[2rem] font-bold transition shadow-lg hover:shadow-green-200/50"
-                >
-                  Get Started
-                </Link>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 hover:text-green-600 p-2"
-            >
-              {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-            </button>
+          {/* Right actions: search + auth */}
+          <div className="flex items-center gap-4 flex-none">
+            <div className="hidden md:flex items-center border border-gray-200 rounded-lg px-2 py-1 bg-white shadow-sm">
+              <FaSearch className="text-gray-400 mr-2" />
+              <input
+                aria-label="Search events"
+                placeholder="Search events, venues..."
+                className="outline-none text-sm text-gray-700 placeholder:text-gray-400 w-60"
+              />
+            </div>
+
+            {/* Auth Section (desktop) */}
+            <div className="hidden md:flex items-center">
+              {user ? (
+                <div className="flex items-center gap-4 border-l border-gray-200 pl-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative group cursor-pointer">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-bold text-lg shadow-md ring-2 ring-white ring-offset-2 hover:scale-105 transition-transform duration-200">
+                        {user.name?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-gray-900">{user.name || "User"}</span>
+                      <span className="text-xs text-gray-500 uppercase">{user.role || "Member"}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="ml-2 bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-700 p-2.5 rounded-full transition-all duration-300"
+                    title="Logout"
+                    aria-label="Logout"
+                  >
+                    <FaSignOutAlt />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link to="/login" className="text-gray-700 hover:text-green-600 font-medium">
+                    Sign In
+                  </Link>
+                  <Link to="/register" className="bg-gradient-to-r from-green-700 to-green-600 text-white px-4 py-2 rounded-full font-semibold shadow">
+                    Get Started
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-gray-700 hover:text-green-600 p-2"
+                aria-expanded={isOpen}
+                aria-controls="mobile-menu"
+              >
+                {isOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
-          <div className="px-4 pt-4 pb-6 space-y-3">
+      <div id="mobile-menu" className={`md:hidden transform origin-top transition-all ${isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 pointer-events-none'}`}>
+        <div className="bg-white border-t border-gray-200 px-4 pt-4 pb-6">
+          <div className="mb-3">
+            <div className="flex items-center gap-2 border rounded-lg px-3 py-2">
+              <FaSearch className="text-gray-400" />
+              <input aria-label="Search mobile" placeholder="Search events" className="w-full outline-none text-sm" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
             {navigationLinks.map((link) => (
               <Link
                 key={link.to}
@@ -184,51 +205,34 @@ const Navbar: React.FC = () => {
                 {link.label}
               </Link>
             ))}
+          </div>
 
-            <div className="border-t border-gray-200 pt-4">
-              {user ? (
-                <>
-                  <div className="flex items-center gap-4 px-4 py-3">
-                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                      {user.name?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{user.name || "User"}</p>
-                      <p className="text-sm text-gray-500 capitalize">
-                        {user.role || "guest"}
-                      </p>
-                    </div>
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            {user ? (
+              <>
+                <div className="flex items-center gap-4 px-4 py-3">
+                  <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                    {user.name?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-3 font-medium"
-                  >
-                    <FaSignOutAlt />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="block w-full text-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    onClick={() => setIsOpen(false)}
-                    className="block w-full text-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
+                  <div>
+                    <p className="font-semibold">{user.name || "User"}</p>
+                    <p className="text-sm text-gray-500 capitalize">{user.role || "guest"}</p>
+                  </div>
+                </div>
+                <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-3 font-medium">
+                  <FaSignOutAlt />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setIsOpen(false)} className="block w-full text-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium">Login</Link>
+                <Link to="/register" onClick={() => setIsOpen(false)} className="block w-full text-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium mt-2">Sign Up</Link>
+              </>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
