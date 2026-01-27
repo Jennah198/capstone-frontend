@@ -1,10 +1,12 @@
 // pages/UserLogin.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useEventContext } from '../../context/EventContext';
 
 const UserLogin: React.FC = () => {
   const { login } = useEventContext();
+  const { BASE_URL, getUserProfile, setUser } = useEventContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -36,8 +38,74 @@ const UserLogin: React.FC = () => {
   };
 
   const handleGoogleLogin = () => {
-    // window.location.href = `${BASE_URL}/api/auth/google`; // Adjust if needed
+    // fallback redirect flow if GSI isn't available
+    const redirect = `${(BASE_URL || '').replace(/\/$/, '')}/api/auth/google`;
+    window.location.href = redirect;
   };
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    const handleCredentialResponse = async (response: any) => {
+      try {
+        const id_token = response.credential;
+        const res = await axios.post(
+          `${(BASE_URL || '').replace(/\/$/, '')}/api/auth/google/token`,
+          { id_token },
+          { withCredentials: true }
+        );
+
+        if (res.data.user) {
+          setUser(res.data.user);
+          const role = res.data.user.role;
+          if (role === 'organizer') navigate('/organizer');
+          else if (role === 'admin') navigate('/admin');
+          else navigate('/');
+        }
+      } catch (err) {
+        console.error('Google login failed', err);
+      }
+    };
+
+    const scriptId = 'google-identity';
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.id = scriptId;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        // @ts-ignore
+        if (window.google) {
+          // @ts-ignore
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleCredentialResponse,
+          });
+          // @ts-ignore
+          window.google.accounts.id.renderButton(
+            document.getElementById('google-signin-button')!,
+            { theme: 'outline', size: 'large', width: '100%' }
+          );
+        }
+      };
+      document.body.appendChild(script);
+    } else {
+      // @ts-ignore
+      if (window.google) {
+        // @ts-ignore
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-button')!,
+          { theme: 'outline', size: 'large', width: '100%' }
+        );
+      }
+    }
+
+    return () => {
+      // no-op
+    };
+  }, [BASE_URL, navigate, setUser]);
 
   return (
     <div className="pt-10 pb-10 w-full flex items-center justify-center">
@@ -45,8 +113,10 @@ const UserLogin: React.FC = () => {
         <h2 className="text-4xl text-gray-900 font-medium">Sign in</h2>
         <p className="text-sm text-gray-500/90 mt-3">Welcome back! Please sign in to continue</p>
 
-        <button type="button" onClick={handleGoogleLogin} className="w-full mt-8 bg-gray-500/10 flex items-center justify-center h-12 rounded-full">
+        <div id="google-signin-button" className="w-full mt-8"></div>
+        <button type="button" onClick={handleGoogleLogin} className="w-full mt-4 bg-gray-500/10 flex items-center justify-center h-10 rounded-full">
           <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/googleLogo.svg" alt="Google" />
+          <span className="ml-2">Sign in with Google (redirect)</span>
         </button>
 
         <div className="flex items-center gap-4 w-full my-5">
