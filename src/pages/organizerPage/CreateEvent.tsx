@@ -257,7 +257,7 @@ const CreateEvent: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex justify-center items-center p-4 sm:p-8 pt-24">
+    <div className="mt-8 w-full flex justify-center items-center p-4 sm:p-8 pt-24">
   <div className="w-full max-w-4xl">
     <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8">
       {/* Header */}

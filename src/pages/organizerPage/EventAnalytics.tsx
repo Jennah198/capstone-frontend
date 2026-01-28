@@ -273,7 +273,7 @@ const OrganizerDashboard: React.FC = () => {
   const percentageChange = getPercentageChange();
 
   return (
-    <div className="w-full flex justify-center items-center p-8 mt-8 pt-16">
+    <div className="mt-8 w-full flex justify-center items-center p-8 mt-8 pt-16">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">

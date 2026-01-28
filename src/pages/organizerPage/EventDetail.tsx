@@ -233,7 +233,7 @@ const EventDetail: React.FC = () => {
 
   if (error || !event) {
     return (
-      <div className="w-full flex justify-center items-center p-8">
+      <div className="mt-8 w-full flex justify-center items-center p-8">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-xl shadow p-8 text-center">
             <FaTimesCircle className="text-red-500 text-6xl mx-auto mb-4" />

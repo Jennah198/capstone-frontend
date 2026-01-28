@@ -86,7 +86,7 @@ const CreateCategory: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex justify-center items-center p-8 pt-20">
+    <div className="mt-8 w-full flex justify-center items-center p-8 pt-20">
       {/* Message Alert */}
       {message && (
         <div className="mb-6 p-4 rounded-lg bg-red-100 text-red-700 border border-red-200">

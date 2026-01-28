@@ -67,7 +67,7 @@ const VenueList: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex justify-center items-center p-4 sm:p-8 pt-20">
+    <div className="mt-8 w-full flex justify-center items-center p-4 sm:p-8 pt-20">
       <div className="max-w-7xl w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
