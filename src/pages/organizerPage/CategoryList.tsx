@@ -59,7 +59,7 @@ const CategoryList: React.FC = () => {
   };
 
   return (
-    <div className="ml-60 p-8 pt-20">
+    <div className="w-full flex justify-center items-center p-8 pt-20">
       <div className="max-w-7xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">

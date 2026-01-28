@@ -5,14 +5,23 @@ import { FaSearch } from "react-icons/fa";
 import { useEventContext } from "../../context/EventContext";
 
 interface Event {
-  _id: string;
+  id: string;                    // ← matches backend ("id", not "_id")
   title: string;
   startDate: string;
-  price: number;
+  normalPrice: {                 // ← real pricing structure
+    price: number;
+    quantity: number;
+  };
+  vipPrice?: {                   // optional, but good to include
+    price: number;
+    quantity: number;
+  };
   image?: string;
   venue?: {
     name: string;
+    city?: string;               // optional, present in real data
   };
+  isPublished?: boolean;
 }
 
 const EventsPage: React.FC = () => {
@@ -29,6 +38,8 @@ const EventsPage: React.FC = () => {
       setLoading(true);
       try {
         const evts = await getEvents();
+        console.log("Events fetched from backend:", evts);
+        console.log("Number of events:", evts?.length || 0);
         setEvents(evts);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -121,30 +132,32 @@ const EventsPage: React.FC = () => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold">Upcoming Events</h2>
             <Link to="/events" className="text-green-600 hover:underline">
-              View All (22)
+              View All ({events.length})
             </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {loading ? (
-              <div className="col-span-full text-center py-8">
-                Loading events...
+              <div className="col-span-full text-center py-8">Loading events...</div>
+            ) : events.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                No upcoming events found.
               </div>
             ) : (
-              (events || []).slice(0, 9).map((event) => (
+              events.slice(0, 9).map((event) => (
                 <Link
-                  to={`/user-event-detail/${event._id}`}
-                  key={event._id}
+                  to={`/user-event-detail/${event.id}`}  // ← fixed: event.id
+                  key={event.id}
                   className="group"
                 >
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition">
                     <div className="relative">
                       <img
                         src={
-                          event.image
-                            ? event.image.startsWith("http")
-                              ? event.image
-                              : `${BASE_URL}/uploads/${event.image}`
+                          event.image && event.image.startsWith("http")
+                            ? event.image
+                            : event.image
+                            ? `${BASE_URL}/uploads/${event.image}`
                             : "https://picsum.photos/300/200"
                         }
                         alt={event.title}
@@ -162,7 +175,8 @@ const EventsPage: React.FC = () => {
                         {new Date(event.startDate).toLocaleDateString()}
                       </p>
                       <p className="text-green-600 font-bold text-xl">
-                        Price: {event.price} ETB
+                        Price: {event.normalPrice?.price ?? "N/A"} ETB
+                        {/* Optional: show VIP too → VIP: {event.vipPrice?.price ?? "N/A"} ETB */}
                       </p>
                     </div>
                   </div>
@@ -177,29 +191,31 @@ const EventsPage: React.FC = () => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold">Popular Events</h2>
             <Link to="/events" className="text-green-600 hover:underline">
-              View All (22)
+              View All ({events.length})
             </Link>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             {loading ? (
-              <div className="col-span-full text-center py-8">
-                Loading events...
+              <div className="col-span-full text-center py-8">Loading events...</div>
+            ) : events.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                No popular events found.
               </div>
             ) : (
-              (events || []).slice(0, 8).map((event) => (
+              events.slice(0, 8).map((event) => (
                 <Link
-                  to={`/user-event-detail/${event._id}`}
-                  key={event._id}
+                  to={`/user-event-detail/${event.id}`}  // ← fixed: event.id
+                  key={event.id}
                   className="group"
                 >
                   <div className="bg-white rounded-2xl shadow hover:shadow-xl transition">
                     <img
                       src={
-                        event.image
-                          ? event.image.startsWith("http")
-                            ? event.image
-                            : `${BASE_URL}/uploads/${event.image}`
+                        event.image && event.image.startsWith("http")
+                          ? event.image
+                          : event.image
+                          ? `${BASE_URL}/uploads/${event.image}`
                           : "https://picsum.photos/300/200"
                       }
                       alt={event.title}
@@ -213,7 +229,7 @@ const EventsPage: React.FC = () => {
                         {new Date(event.startDate).toLocaleDateString()}
                       </p>
                       <p className="text-green-600 font-bold mt-2">
-                        Price: {event.price} ETB
+                        Price: {event.normalPrice?.price ?? "N/A"} ETB
                       </p>
                     </div>
                   </div>
@@ -222,7 +238,7 @@ const EventsPage: React.FC = () => {
             )}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination - static for now, can make dynamic later */}
           <div className="flex justify-center gap-2 mt-10">
             <button className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center">
               &lt;

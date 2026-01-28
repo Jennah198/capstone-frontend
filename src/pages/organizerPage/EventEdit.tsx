@@ -411,7 +411,7 @@ const EditEvent: React.FC = () => {
   }
 
   return (
-    <div className="ml-64 p-8">
+    <div className="w-full flex justify-center items-center  p-8">
       {/* Message Alert */}
       {message.text && (
         <div

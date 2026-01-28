@@ -68,11 +68,8 @@ const EventList: React.FC = () => {
         ...filters,
         search: searchTerm,
       };
-
       const res = await getAllEvents(params);
-      if (res.success) {
-        setEvents(res.data || []);
-      }
+      if (res.success) setEvents(res.data || []);
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {
@@ -83,9 +80,7 @@ const EventList: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const res = await getCategories();
-      if (res.success) {
-        setCategories(res.categories || []);
-      }
+      if (res.success) setCategories(res.categories || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -148,9 +143,7 @@ const EventList: React.FC = () => {
 
     try {
       const res = await deleteEvent(eventId);
-      if (res.success) {
-        fetchEvents();
-      }
+      if (res.success) fetchEvents();
     } catch (error) {
       console.error("Error deleting event:", error);
       alert("Failed to delete event");
@@ -158,142 +151,135 @@ const EventList: React.FC = () => {
   };
 
   return (
-    <div className="ml-60 p-8 pt-20">
-      <div className="max-w-7xl">
+    <div className="w-full flex justify-center items-start p-4 md:p-8 pt-20">
+      <div className="max-w-7xl w-full">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4 md:gap-0">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Events</h1>
-            <p className="text-gray-600 mt-2">Manage all your events</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+              Events
+            </h1>
+            <p className="text-gray-600 mt-1 md:mt-2">Manage all your events</p>
           </div>
           <Link
             to="/organizer/create-event"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2"
+            className="bg-blue-600 text-white px-5 py-2 md:px-6 md:py-3 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2"
           >
-            <FaPlus />
-            Create New Event
+            <FaPlus /> Create New Event
           </Link>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="bg-white rounded-xl shadow border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSearch(e)}
-                  placeholder="Search events by title..."
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                />
-              </div>
+        {/* Search & Filters */}
+        <div className="bg-white rounded-xl shadow border border-gray-200 p-4 md:p-6 mb-6 md:mb-8">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4 flex-wrap">
+            <div className="flex-1 relative">
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch(e)}
+                placeholder="Search events..."
+                className="w-full pl-10 pr-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              />
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <select
-                value={filters.status}
-                onChange={(e) => handleFilterChange("status", e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
-              >
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="upcoming">Upcoming</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="completed">Completed</option>
-              </select>
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange("status", e.target.value)}
+              className="px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
+            >
+              <option value="all">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+            </select>
 
-              <select
-                value={filters.category}
-                onChange={(e) => handleFilterChange("category", e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
-              >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option
-                    key={category._id || category.id}
-                    value={category._id || category.id}
-                  >
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+            <select
+              value={filters.category}
+              onChange={(e) => handleFilterChange("category", e.target.value)}
+              className="px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
+            >
+              <option value="">All Categories</option>
+              {categories.map((category) => (
+                <option key={category._id || category.id} value={category._id || category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
 
-              <select
-                value={filters.dateRange}
-                onChange={(e) =>
-                  handleFilterChange("dateRange", e.target.value)
-                }
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
-              >
-                <option value="all">All Dates</option>
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="past">Past Events</option>
-                <option value="future">Future Events</option>
-              </select>
+            <select
+              value={filters.dateRange}
+              onChange={(e) => handleFilterChange("dateRange", e.target.value)}
+              className="px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
+            >
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="past">Past Events</option>
+              <option value="future">Future Events</option>
+            </select>
 
-              <button
-                onClick={clearFilters}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition"
-              >
-                Clear Filters
-              </button>
-            </div>
+            <button
+              onClick={clearFilters}
+              className="px-4 md:px-6 py-2 md:py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
+            >
+              Clear Filters
+            </button>
           </div>
         </div>
 
         {/* Events Table */}
         <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <FaSpinner className="animate-spin text-blue-600 text-3xl" />
-              <span className="ml-3 text-gray-600">Loading events...</span>
+            <div className="flex justify-center items-center py-10 md:py-20 gap-3">
+              <FaSpinner className="animate-spin text-blue-600 text-2xl md:text-3xl" />
+              <span className="text-gray-600 text-sm md:text-base">
+                Loading events...
+              </span>
             </div>
           ) : events.length === 0 ? (
-            <div className="text-center py-20">
-              <FaCalendarAlt className="text-gray-300 text-6xl mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-gray-800 mb-2">
+            <div className="text-center py-10 md:py-20">
+              <FaCalendarAlt className="text-gray-300 text-5xl md:text-6xl mx-auto mb-4" />
+              <h3 className="text-lg md:text-xl font-medium text-gray-800 mb-2">
                 No events found
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-4 md:mb-6">
                 Get started by creating your first event
               </p>
               <Link
                 to="/organizer/create-event"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium hover:bg-blue-700 transition"
               >
-                <FaPlus />
-                Create Event
+                <FaPlus /> Create Event
               </Link>
             </div>
           ) : (
             <>
-              {/* Desktop View */}
+              {/* Desktop Table */}
               <div className="hidden md:block overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[700px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
                         Event
                       </th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
                         Category
                       </th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
                         Venue
                       </th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
                         Pricing
                       </th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
                         Status
                       </th>
-                      <th className="text-left py-4 px-6 font-medium text-gray-700">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
                         Actions
                       </th>
                     </tr>
@@ -302,12 +288,9 @@ const EventList: React.FC = () => {
                     {events.map((event) => {
                       const status = getEventStatus(event);
                       return (
-                        <tr
-                          key={event.id}
-                          className="hover:bg-gray-50 transition"
-                        >
-                          <td className="py-4 px-6">
-                            <div className="flex items-start gap-4">
+                        <tr key={event.id} className="hover:bg-gray-50 transition">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-3">
                               {event.image && (
                                 <img
                                   src={
@@ -316,97 +299,50 @@ const EventList: React.FC = () => {
                                       : `${BASE_URL}/uploads/${event.image}`
                                   }
                                   alt={event.title}
-                                  className="w-16 h-16 object-cover rounded-lg"
-                                  onError={(
-                                    e: React.SyntheticEvent<HTMLImageElement>
-                                  ) => {
+                                  className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg"
+                                  onError={(e: any) => {
                                     e.currentTarget.onerror = null;
-                                    e.currentTarget.src =
-                                      "https://picsum.photos/150";
+                                    e.currentTarget.src = "https://picsum.photos/150";
                                   }}
                                 />
                               )}
                               <div>
-                                <h4 className="font-medium text-gray-800 mb-1">
+                                <h4 className="font-medium text-gray-800 text-sm md:text-base">
                                   {event.title}
                                 </h4>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-xs md:text-sm text-gray-600">
                                   {event.category?.name || "No category"}
                                 </p>
                               </div>
                             </div>
                           </td>
-
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              <FaTag className="text-gray-400" />
-                              <span className="text-sm">
-                                {event.category?.name || "—"}
-                              </span>
-                            </div>
+                          <td className="py-3 px-4 text-sm">{event.category?.name || "—"}</td>
+                          <td className="py-3 px-4 text-sm">{event.venue?.name || "—"}</td>
+                          <td className="py-3 px-4 text-sm">
+                            {event.normalPrice?.price > 0
+                              ? `$${event.normalPrice.price}`
+                              : event.normalPrice?.price === 0
+                              ? <span className="text-green-600">Free</span>
+                              : "—"}
                           </td>
-
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              <FaMapMarkerAlt className="text-gray-400" />
-                              <span className="text-sm">
-                                {event.venue?.name || "—"}
-                              </span>
-                            </div>
-                          </td>
-
-                          <td className="py-4 px-6">
-                            <div className="space-y-1">
-                              {event.normalPrice &&
-                              event.normalPrice.price > 0 ? (
-                                <span className="text-sm">
-                                  ${event.normalPrice.price}
-                                </span>
-                              ) : event.normalPrice &&
-                                event.normalPrice.price === 0 ? (
-                                <span className="text-sm text-green-600">
-                                  Free
-                                </span>
-                              ) : (
-                                <span className="text-sm text-gray-400">—</span>
-                              )}
-                            </div>
-                          </td>
-
-                          <td className="py-4 px-6">
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                status
-                              )}`}
-                            >
+                          <td className="py-3 px-4">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
                               {status.charAt(0).toUpperCase() + status.slice(1)}
                             </span>
                           </td>
-
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              <Link
-                                to={`/organizer/event-detail/${event.id}`}
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                                title="View"
-                              >
-                                <FaEye />
-                              </Link>
-                              <Link
-                                to={`/organizer/edit-event/${event.id}`}
-                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                                title="Edit"
-                              >
-                                <FaEdit />
-                              </Link>
-                              <button
-                                onClick={() => handleDelete(event.id)}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                                title="Delete"
-                              >
-                                <FaTrash />
-                              </button>
-                            </div>
+                          <td className="py-3 px-4 flex items-center gap-2">
+                            <Link to={`/organizer/event-detail/${event.id}`} className="p-1 text-blue-600 hover:bg-blue-50 rounded transition">
+                              <FaEye />
+                            </Link>
+                            <Link to={`/organizer/edit-event/${event.id}`} className="p-1 text-green-600 hover:bg-green-50 rounded transition">
+                              <FaEdit />
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(event.id)}
+                              className="p-1 text-red-600 hover:bg-red-50 rounded transition"
+                            >
+                              <FaTrash />
+                            </button>
                           </td>
                         </tr>
                       );
@@ -415,82 +351,40 @@ const EventList: React.FC = () => {
                 </table>
               </div>
 
-              {/* Mobile View */}
+              {/* Mobile List */}
               <div className="md:hidden divide-y divide-gray-200">
                 {events.map((event) => {
                   const status = getEventStatus(event);
                   return (
-                    <div key={event.id} className="p-4 hover:bg-gray-50">
-                      <div className="flex justify-between items-start mb-3">
+                    <div key={event.id} className="p-4 hover:bg-gray-50 flex flex-col gap-2">
+                      <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-medium text-gray-800 mb-1">
-                            {event.title}
-                          </h4>
-                          <div className="flex items-center gap-2 mb-2">
-                            <FaTag className="text-gray-400 text-xs" />
-                            <span className="text-xs text-gray-600">
-                              {event.category?.name || "No category"}
-                            </span>
+                          <h4 className="font-medium text-gray-800 text-sm">{event.title}</h4>
+                          <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
+                            <FaTag /> {event.category?.name || "No category"}
                           </div>
-                          <span
-                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                              status
-                            )}`}
-                          >
+                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 ${getStatusColor(status)}`}>
                             {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Link
-                            to={`/organizer/edit-event/${event.id}`}
-                            className="p-1 text-green-600"
-                          >
-                            <FaEdit />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(event.id)}
-                            className="p-1 text-red-600"
-                          >
-                            <FaTrash />
-                          </button>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Link to={`/organizer/edit-event/${event.id}`} className="p-1 text-green-600"><FaEdit /></Link>
+                          <button onClick={() => handleDelete(event.id)} className="p-1 text-red-600"><FaTrash /></button>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <FaClock />
-                          <span className="text-xs">
-                            {formatDate(event.startDate)}
-                          </span>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mt-2">
+                        <div className="flex items-center gap-1"><FaClock /> {formatDate(event.startDate)}</div>
+                        <div className="flex items-center gap-1"><FaMapMarkerAlt /> {event.venue?.name || "No venue"}</div>
+                        <div className="flex items-center gap-1">
+                          {event.normalPrice?.price > 0
+                            ? `$${event.normalPrice.price}`
+                            : event.normalPrice?.price === 0
+                            ? <span className="text-green-600">Free</span>
+                            : "—"}
                         </div>
-
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <FaMapMarkerAlt />
-                          <span className="text-xs">
-                            {event.venue?.name || "No venue"}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {event.normalPrice && event.normalPrice.price > 0 ? (
-                            <span className="text-xs">
-                              ${event.normalPrice.price}
-                            </span>
-                          ) : event.normalPrice &&
-                            event.normalPrice.price === 0 ? (
-                            <span className="text-xs text-green-600">Free</span>
-                          ) : (
-                            <span className="text-xs text-gray-400">
-                              No price
-                            </span>
-                          )}
-                        </div>
-
                         <div>
-                          <Link
-                            to={`/organizer/event-detail/${event.id}`}
-                            className="text-blue-600 font-medium text-xs flex items-center gap-1"
-                          >
+                          <Link to={`/organizer/event-detail/${event.id}`} className="text-blue-600 font-medium flex items-center gap-1">
                             View Details <FaEye className="text-xs" />
                           </Link>
                         </div>
@@ -504,8 +398,8 @@ const EventList: React.FC = () => {
         </div>
 
         {events.length > 0 && (
-          <div className="mt-4 text-right text-sm text-gray-600">
-            Showing {events.length} events
+          <div className="mt-3 text-right text-xs md:text-sm text-gray-600">
+            Showing {events.length} event{events.length > 1 ? "s" : ""}
           </div>
         )}
       </div>

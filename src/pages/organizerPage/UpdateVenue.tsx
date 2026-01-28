@@ -117,7 +117,7 @@ const UpdateVenue: React.FC = () => {
   }
 
   return (
-    <div className="ml-60 p-8 pt-20">
+    <div className="w-full flex justify-center items-center  p-8 pt-20">
       <Link
         to="/organizer/venue-list"
         className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition mb-6"

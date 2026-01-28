@@ -1,15 +1,15 @@
 // src/layouts/OrganizerLayout.tsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Organizer from '../pages/organizerPage/Organizer'; // Your sidebar layout
+import Organizer from '../pages/organizerPage/Organizer';
 
-const OrganizerLayout: React.FC = () => {
+const OrganizerLayout = () => {
   return (
-    <div className="flex min-h-screen">
-      <Organizer /> {/* This already includes sidebar */}
-      <div className="flex-1">
+    <div className="flex">
+      <Organizer />
+      <main className="p-4 w-full">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 };
